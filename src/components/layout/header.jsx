@@ -43,7 +43,7 @@ export default function Header(){
   }, []);
   
   const navItems = [
-    { name: 'Home', href: '/' },
+    { name: 'Home', href: '/dashboard' },
     { name: 'Explore', href: '/explore' },
     { name: 'Events', href: '/events' },
     { name: 'Groups', href: '/groups' },
@@ -61,7 +61,7 @@ export default function Header(){
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
           <div className="flex items-center">
-            <Link href="/" className="flex items-center space-x-2">
+            <Link href={`${user?"/dashboard":"/"}`} className="flex items-center space-x-2">
               <Layers className="w-8 h-8 text-primary" />
               <span className="hidden text-xl font-bold sm:inline-block">GDG Social</span>
             </Link>
@@ -69,7 +69,7 @@ export default function Header(){
           
           {/* Desktop Navigation */}
           <nav className="hidden space-x-1 md:flex">
-            {navItems.map((item) => (
+            {user && navItems.map((item) => (
               <Button
                 key={item.name}
                 variant={pathname === item.href ? "default" : "ghost"}
