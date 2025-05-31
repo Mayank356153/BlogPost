@@ -89,11 +89,23 @@ export default function LoginPage(){
         description: 'Successfully logged in with Github.',
       });
     } catch (error) {
-      toast({
-        variant: 'destructive',
-        title: 'Login failed',
-        description: 'Failed to login with Github. Please try again.',
-      });
+       if (error.code === "auth/account-exists-with-different-credential") {
+      const email = error.customData?.email;
+      console.log("JHH")
+       console.log(error.customData)
+      if (email) {
+        const methods = await fetchSignInMethodsForEmail(auth, email);
+        console.log(methods)
+        toast.error(
+          `Account exists with ${methods[0]} sign-in. Please use that instead.`
+        );
+      } else {
+        toast.error("This email is already used with another provider.");
+      }
+    } else {
+      toast.error("GitHub sign-in failed.");
+      console.error("GitHub sign-in error:", error?.code, error?.message);
+    }
     } finally {
       setIsLoading(false);
     }

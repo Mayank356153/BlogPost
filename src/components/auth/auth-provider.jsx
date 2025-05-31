@@ -26,28 +26,30 @@ export function AuthProvider({children}){
     const auth=getAuth(app);
   
 
-    useEffect(() => {
-  const unsubscribe = onAuthStateChanged(auth, async (person) => {
-  if (person) {
-    if (person.emailVerified) {
-              const userRef = doc(db, "users", person.uid);
-    const userSnap = await getDoc(userRef);
+//     useEffect(() => {
+//   const unsubscribe = onAuthStateChanged(auth, async (person) => {
+//   if (person) {
+//     if (person.emailVerified) {
+//               const userRef = doc(db, "users", person.uid);
+//     const userSnap = await getDoc(userRef);
     
-                setUser(userSnap.data())
-                    router.push("/dashboard")
-    } else { 
-            toast.error("Verify your email first. A verification link has been sent.");
-      setUser(null);
-    }
-  } else {
-    await auth.signOut()
-    setUser(null); // Not logged in
-  }
-});
+//                 setUser(userSnap.data())
+//                     router.push("/dashboard")
+//     } else { 
+//       console.log(person)
+//             toast.error("Verify your email first. A verification link has been sent.");
+//       setUser(null);
+//     }
+//   } else {
+//     await auth.signOut()
+//     setUser(null); // Not logged in
+//   }
+// });
 
 
-  return () => unsubscribe(); // Clean up the listener
-}, [auth]); // add dependency
+
+//   return () => unsubscribe(); // Clean up the listener
+// }, [auth]); // add dependency
 
 
 //login user with email and password
@@ -72,23 +74,35 @@ const LoginWithEmail = async (email, password) => {
     const userCredential = await signInWithEmailAndPassword(auth, email, password);
     const user = userCredential.user;
 
-    if (!user.emailVerified) {
-      await sendEmailVerification(user);
-      toast.error("Verify your email first. A verification link has been sent.");
-      return ;
+    // if (!user.emailVerified) {
+    //   await sendEmailVerification(user);
+    //   toast.error("Verify your email first. A verification link has been sent.");
+    //   return ;
+    // }
+
+
+       if (user.emailVerified) {
+              const userRef = doc(db, "users", user.uid);
+    const userSnap = await getDoc(userRef);
+    
+                setUser(userSnap.data())
+                    router.push("/dashboard")
+    } else { 
+      console.log(user)
+            toast.error("Verify your email first. A verification link has been sent.");
+      setUser(null);
     }
-      
     
                 
   
-    toast.success("Login successful!");
+  
         console.log("Signed in user:", user);
 
 
    return;
 
   } catch (error) {
-    toast.error(`Login failed: ${error.code}`);
+    console.log(`Login failed: ${error.code}`);
     }
 
 };
@@ -124,7 +138,7 @@ const userRef = doc(db, "users", user.uid);
     await sendEmailVerification(user);
 
     toast.success("Verification email sent successfully");
-    toast.success("Sign up successful");
+
     router.push("/login");
 
     return {
@@ -195,14 +209,24 @@ const googleLogin=async()=>{
       });
     }
 
+  if (user.emailVerified) {
+              const userRef = doc(db, "users", user.uid);
+    const userSnap = await getDoc(userRef);
+    
+                setUser(userSnap.data())
+                    router.push("/dashboard")
+    console.log("Signed in user:", user);
+    } else { 
+      console.log(user)
+            toast.error("Verify your email first. A verification link has been sent.");
+      setUser(null);
+    }
     // router.push("/dashboard")
     // setUser(userSnap.data())
 
 
-    toast.success(`Welcome ${user.displayName || "User"}!`);
-    console.log("Signed in user:", user);
+   
   } catch (error) {
-    toast.error("Google sign-in failed");
     console.error("Google sign-in error:", error?.code, error?.message);
   }
 }
@@ -232,8 +256,15 @@ const githubLogin=async()=>{
         createdAt: new Date(),
       });
     }
-  console.log("Signed in user:", user);
-  toast.success(`Welcome ${user.displayName || "User"}!`);
+
+    
+                setUser(userSnap.data())
+                    router.push("/dashboard")
+                     console.log("Signed in user:", user);
+   
+
+
+ 
 } 
 
 
@@ -243,23 +274,9 @@ else {
 
 
   } catch (error) {
-   if (error.code === "auth/account-exists-with-different-credential") {
-      const email = error.customData?.email;
-      console.log("JHH")
-       console.log(error.customData)
-      if (email) {
-        const methods = await fetchSignInMethodsForEmail(auth, email);
-        console.log(methods)
-        toast.error(
-          `Account exists with ${methods[0]} sign-in. Please use that instead.`
-        );
-      } else {
-        toast.error("This email is already used with another provider.");
-      }
-    } else {
-      toast.error("GitHub sign-in failed.");
+  
       console.error("GitHub sign-in error:", error?.code, error?.message);
-    }
+    
   }
 }
 
