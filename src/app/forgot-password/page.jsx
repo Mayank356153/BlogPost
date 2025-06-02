@@ -25,7 +25,7 @@ const formSchema=z.object({
 
 
 export default function ForgotPasswordPage(){
-    const {toast} = useToast();
+    
     const{resetPassword}=useAuth()
     const[isLoading,setIsLoading]=useState(false)
     const[isSubmitted,setIsSubmitted]=useState(false)
