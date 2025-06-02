@@ -15,16 +15,19 @@ import isEmail from "validator/lib/isEmail"
 import { GoogleAuthProvider } from "firebase/auth"
 import { GithubAuthProvider } from "firebase/auth"
 import { signInWithPopup } from "firebase/auth"
+import { setPersistence } from "firebase/auth"
+import { browserLocalPersistence } from "firebase/auth"
 import { fetchSignInMethodsForEmail } from "firebase/auth"
-export function AuthProvider({children}){
+export  function AuthProvider({children}){
     const[user,setUser]=useState(null);
+    const [currentUser,setCurrentUser]=useState(null)
     const[isLoading,setLoading]=useState(false)
-     const Toast=useToast()
     const router=useRouter();
 
     
     const auth=getAuth(app);
   
+// await setPersistence(auth, browserLocalPersistence);
 
 //     useEffect(() => {
 //   const unsubscribe = onAuthStateChanged(auth, async (person) => {
@@ -53,6 +56,8 @@ export function AuthProvider({children}){
 
 
 //login user with email and password
+
+
 const LoginWithEmail = async (email, password) => {
 
   if (!isEmail(email) || !password.trim()) {
@@ -63,6 +68,7 @@ const LoginWithEmail = async (email, password) => {
   try {
     
     console.log(email)
+    
     const method = await fetchSignInMethodsForEmail(auth, email);
    console.log(method)
     if (method.length && !method.includes("password")) {
@@ -86,6 +92,7 @@ const LoginWithEmail = async (email, password) => {
     const userSnap = await getDoc(userRef);
     
                 setUser(userSnap.data())
+                setCurrentUser(auth.currentUser)
                     router.push("/dashboard")
     } else { 
       console.log(user)
@@ -162,6 +169,7 @@ const logoutUser = async () => {
     toast.success("Signed out successfully");
     router.push("/")
     setUser(null)
+    setCurrentUser(null);
     return { success: true };
   } catch (error) {
     toast.error(`Sign out failed: ${error.message}`);
@@ -192,6 +200,7 @@ const googleLogin=async()=>{
  const provider = new GoogleAuthProvider();
 
   try {
+    
     const result = await signInWithPopup(auth, provider);
     const user = result.user;
 
@@ -214,6 +223,7 @@ const googleLogin=async()=>{
     const userSnap = await getDoc(userRef);
     
                 setUser(userSnap.data())
+                setCurrentUser(auth.currentUser)
                     router.push("/dashboard")
     console.log("Signed in user:", user);
     } else { 
@@ -237,6 +247,7 @@ const githubLogin=async()=>{
  const provider = new GithubAuthProvider();
 
   try {
+    
     const result = await signInWithPopup(auth, provider);
     const user = result.user;
 
@@ -260,6 +271,7 @@ const githubLogin=async()=>{
 
                 const userDoc=await getDoc(userRef)
                 setUser(userDoc.data())
+                setCurrentUser(auth.currentUser)
 
                     router.push("/dashboard")
                      console.log("Signed in user:", user);
@@ -301,6 +313,7 @@ const githubLogin=async()=>{
 
 const value={
     user,
+    currentUser,
     isLoading,
     LoginWithEmail,
     logoutUser,

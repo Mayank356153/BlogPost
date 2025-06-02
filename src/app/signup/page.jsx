@@ -10,7 +10,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Form,FormControl,FormField,FormItem,FormLabel,FormMessage } from "@/components/ui/form"
 import { useAuth } from "@/components/auth/auth-provider"
-import { useToast } from "@/hooks/use-toast"
+import {toast} from "sonner"
 
 const formSchema = z.object({
   name: z.string().min(2, { message: "Name must be at least 2 characters." }),
@@ -32,7 +32,6 @@ const formSchema = z.object({
 export default function SignupPage() {
 
     const { signUpWithEmail}=useAuth();
-    const {toast}=useToast();
     const[isLoading,setIsLoading]=useState(false)
     const form=useForm({
         resolver: zodResolver(formSchema),
@@ -47,17 +46,28 @@ export default function SignupPage() {
     const onSubmit=async (values)=>{
         setIsLoading(true)
         try {
-            await signUpWithEmail(values.name,values.email,values.password)
-             toast({
-        title: 'Account created!',
-        description: 'You have successfully signed up.',
-      });
-        } catch (error) {
-            toast({
-        variant: 'destructive',
-        title: 'Registration failed',
-        description: 'There was a problem creating your account.',
-      });
+            await signUpWithEmail(values.name,values.email,values.password);
+            
+          toast(
+  <>
+    <strong>Account created!</strong>
+    <div>You have successfully signed up.</div>
+  </>,
+  { variant: 'success' }
+);
+
+        }
+         catch (error) {
+          toast(
+  <div>
+    <strong>Registration failed</strong>
+    <div>There was a problem creating your account.</div>
+  </div>, 
+  { 
+    variant: 'destructive' 
+  }
+);
+
         }
         finally{
             setIsLoading(false)
@@ -146,6 +156,7 @@ export default function SignupPage() {
         >
           Sign in
         </Link>
+       
       </p>
     </div>
         )

@@ -24,8 +24,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useToast } from "@/hooks/use-toast";
-
+import { toast } from "sonner";
 const formSchema = z.object({
   name: z.string().min(3, "Name must be at least 3 characters"),
   description: z.string().min(10, "Description must be at least 10 characters"),
@@ -49,7 +48,6 @@ const categories = [
 
 export default function CreateGroupPage() {
   const router = useRouter();
-  const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const form = useForm({
@@ -74,14 +72,18 @@ export default function CreateGroupPage() {
         title: "Group created",
         description: "Your group has been created successfully.",
       });
+
+      toast.success(<>
+      <strong>Group Created</strong>
+      <div>
+        Your group has been created successfully.
+      </div>
+      </>)
       
       router.push("/groups");
     } catch (error) {
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: "Failed to create group. Please try again.",
-      });
+     
+      toast.error("Failed to create group. Please try again.")
     } finally {
       setIsSubmitting(false);
     }

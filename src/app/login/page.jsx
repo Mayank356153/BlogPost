@@ -18,15 +18,15 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { useAuth } from '@/components/auth/auth-provider';
-import { useToast } from '@/hooks/use-toast';
 import isEmail from "validator/lib/isEmail"
+import {toast} from "sonner";
 const formSchema= z.object({
      email: z.string().email({ message: 'Please enter a valid email address.' }),
   password: z.string().min(6, { message: 'Password must be at least 6 characters.' }),
 })
+
 export default function LoginPage(){
     const {LoginWithEmail,googleLogin,githubLogin} =useAuth();
-     const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
 
   const form = useForm({
@@ -43,16 +43,24 @@ export default function LoginPage(){
         setIsLoading(true)
         try {
             await LoginWithEmail(values.email,values.password)
-             toast({
-        title: 'Welcome back!',
-        description: 'You have successfully logged in.',
-      });
+        
+      toast.success(<>
+        <strong>Welcome back!</strong>
+        <div>You have successfully logged in.</div>
+      </>)
         } catch (error) {
              toast({
         variant: 'destructive',
         title: 'Login failed',
         description: 'Please check your credentials and try again.',
       });
+
+
+    toast.error(<>
+           <strong>Login failed</strong>
+        <div>Please check your credentials and try again.</div>
+    </>)
+      
         }
         finally{
             setIsLoading(false);
@@ -64,16 +72,19 @@ export default function LoginPage(){
     setIsLoading(true);
     try {
       await googleLogin();
-      toast({
-        title: 'Google login',
-        description: 'Successfully logged in with Google.',
-      });
+     
+      toast.success(<>
+        <strong>Google login successful!</strong>
+        <div>You have successfully logged in with Google.</div>
+      </>)
     } catch (error) {
-      toast({
-        variant: 'destructive',
-        title: 'Login failed',
-        description: 'Failed to login with Google. Please try again.',
-      });
+     
+
+
+      toast.error(<>
+        <strong>Google login failed</strong>
+        <div>Please try again.</div>
+      </>)
     } finally {
       setIsLoading(false);
     }
@@ -83,16 +94,20 @@ export default function LoginPage(){
     setIsLoading(true);
     try {
       await githubLogin();
-      toast({
-        title: 'Github login',
-        description: 'Successfully logged in with Github.',
-      });
+     
+
+
+      toast.success(<>
+        <strong>Github login successful!</strong>
+        <div>You have successfully logged in with Github.</div>
+      </>)
     } catch (error) {
-      toast({
-        variant: 'destructive',
-        title: 'Login failed',
-        description: 'Failed to login with Github. Please try again.',
-      });
+     
+
+      toast.error(<>
+        <strong>Github login failed</strong>
+        <div>Please try again.</div>
+      </>)
     } finally {
       setIsLoading(false);
     }

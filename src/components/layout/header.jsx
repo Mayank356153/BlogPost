@@ -112,12 +112,12 @@ export default function Header(){
                   </Link>
                 </Button>
                 <ThemeToggle />
-                
+
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Button variant="ghost" className="relative w-8 h-8 rounded-full">
                       <Avatar className="w-8 h-8">
-                        <AvatarImage src={user.image} alt={user.name} />
+                        <AvatarImage src={user.image || "/blank-profile-picture-973460_1280.webp" } alt={user.name} />
                         <AvatarFallback>{user.name.charAt(0)}</AvatarFallback>
                       </Avatar>
                     </Button>

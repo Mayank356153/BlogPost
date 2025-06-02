@@ -17,7 +17,7 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { useToast } from "@/hooks/use-toast";
+import {toast} from "sonner";
 import { Badge } from "@/components/ui/badge";
 
 const formSchema = z.object({
@@ -46,7 +46,6 @@ const mockEvent = {
 export default function EventRegisterPage() {
 const params = useParams();
   const router = useRouter();
-  const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [event] = useState(mockEvent);
 
@@ -67,18 +66,25 @@ const params = useParams();
       // Simulate API call
       await new Promise(resolve => setTimeout(resolve, 1500));
       
-      toast({
-        title: "Registration successful",
-        description: "You have successfully registered for the event.",
-      });
+     toast(
+  <>
+    <strong>Registration successful</strong>
+    <div>You have successfully registered for the event.</div>
+  </>,
+  { variant: 'success' }
+);
+
       
       router.push(`/events/${params.id}`);
     } catch (error) {
-      toast({
-        variant: "destructive",
-        title: "Registration failed",
-        description: "Failed to register for the event. Please try again.",
-      });
+     toast(
+  <>
+    <strong>Registration failed</strong>
+    <div>Failed to register for the event. Please try again.</div>
+  </>,
+  { variant: "destructive" }
+);
+
     } finally {
       setIsSubmitting(false);
     }

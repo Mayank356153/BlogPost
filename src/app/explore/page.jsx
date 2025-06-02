@@ -1,13 +1,17 @@
 "use client"
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Search, Users, Calendar, Hash } from "lucide-react";
 // import {Post} from "@/components/feed/feed-container"
 import  PostCard  from "@/components/post/post-card";
-
+import { db } from "@/config/firebase";
+import { collection, onSnapshot } from "firebase/firestore";
+import { set } from "date-fns";
+import { updateDoc,doc,arrayUnion } from "firebase/firestore";
+import { useAuth } from "@/components/auth/auth-provider";
 
 const mockPosts = [
   {
@@ -47,6 +51,9 @@ const mockPosts = [
   },
 ];
 
+
+
+
 const topics = [
   { name: "Flutter", posts: 1234, followers: 5678 },
   { name: "Machine Learning", posts: 987, followers: 4321 },
@@ -56,29 +63,35 @@ const topics = [
 ];
 
 
-const people = [
-  {
-    name: "Sarah Chen",
-    username: "sarahchen",
-    image: "https://images.pexels.com/photos/415829/pexels-photo-415829.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
-    bio: "ML Engineer | GDG Organizer",
-    followers: 1234,
-  },
-  {
-    name: "Alex Kumar",
-    username: "alexk",
-    image: "https://images.pexels.com/photos/2379004/pexels-photo-2379004.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
-    bio: "Flutter Developer | Tech Writer",
-    followers: 987,
-  },
-];
+
+
+
+
+
+const users=async(setPeople,current_id)=>{
+  const usersCollection = collection(db, "users");
+  
+  const unsubscribe = onSnapshot(usersCollection, (snapshot) => {
+    const users = snapshot.docs.map((doc) => ({
+      id: doc.id,
+      ...doc.data(),
+    }));
+    setPeople(users.filter(user => user.id !== current_id)); // Exclude default user if needed
+  
+    console.log("Users updated:", users.filter(user => user.id !== current_id));
+  });
+  return unsubscribe || [];
+}
 
 
 
 export default function ExplorePage() {
-const [searchQuery,setSearchQuery]=useState("") 
-const [posts, setPosts] = useState(mockPosts);
-
+  const [searchQuery,setSearchQuery]=useState("") 
+  const [posts, setPosts] = useState(mockPosts);
+  const[people,setPeople]=useState([])
+  const {currentUser,user}=useAuth();
+  const[currentfollowing,setCurrentFollowing]=useState([])
+  const[filteredPeople,setFilteredPeople]=useState([])
 const handleLike = (postId) => {
     setPosts(posts.map(post => {
       if (post.id === postId) {
@@ -92,6 +105,57 @@ const handleLike = (postId) => {
       return post;
     }));
   };
+
+  const followUser = async ( targetUserId) => {
+  if (!currentUser.uid || !targetUserId) return;
+
+  const currentUserRef = doc(db, "users", currentUser.uid);
+
+  try {
+    await updateDoc(currentUserRef, {
+      following: arrayUnion(targetUserId),
+    });
+    setCurrentFollowing((prev) => [...prev, targetUserId]);
+    console.log("User followed!");
+  } catch (error) {
+    console.error("Error following user:", error);
+  }
+};
+
+const checkIfFollowing = (targetUserId) => {
+  if (!currentUser?.uid || !targetUserId) return false;
+
+  console.log("CURRENT USER",currentUser)
+  console.log("TARGET USER ID",targetUserId)
+  
+  console.log("RESULT",user.following?.includes(targetUserId))
+  return user.following?.includes(targetUserId) || currentfollowing.includes(targetUserId) || false;
+  
+}
+
+useEffect(() => {
+    const query = searchQuery.toLowerCase();
+
+    
+if (!query || query.trim() === "") {
+    setFilteredPeople(people); // Return all people if search query is empty
+    return;
+  }
+
+  
+    const filtered = people.filter(person =>
+      person.name.toLowerCase().includes(query) ||
+      person.username.toLowerCase().includes(query)
+    );
+
+    setFilteredPeople(filtered);
+  }, [searchQuery,people]);
+
+  useEffect(()=>{
+   users(setPeople,currentUser?.uid)
+   console.log("users")
+    console.log(people)
+  },[])
 
    return (
     <div className="container px-4 py-8 mx-auto">
@@ -139,7 +203,7 @@ const handleLike = (postId) => {
                     <Hash className="w-5 h-5 text-primary" />
                     <h3 className="font-semibold">{topic.name}</h3>
                   </div>
-                  <Button variant="outline" size="sm">Follow</Button>
+                  <Button variant="outline" size="sm" >Follow</Button>
                 </div>
                 <div className="text-sm text-muted-foreground">
                   <p>{topic.posts.toLocaleString()} posts</p>
@@ -152,14 +216,14 @@ const handleLike = (postId) => {
 
         <TabsContent value="people">
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-            {people.map((person) => (
+            {filteredPeople.map((person) => (
               <div
-                key={person.username}
+                key={person.id}
                 className="p-4 transition-colors border rounded-lg hover:bg-muted/50"
               >
                 <div className="flex items-start gap-3">
                   <img
-                    src={person.image}
+                       src={person.image || "/blank-profile-picture-973460_1280.webp"}
                     alt={person.name}
                     className="object-cover w-12 h-12 rounded-full"
                   />
@@ -169,11 +233,11 @@ const handleLike = (postId) => {
                         <h3 className="font-semibold">{person.name}</h3>
                         <p className="text-sm text-muted-foreground">@{person.username}</p>
                       </div>
-                      <Button variant="outline" size="sm">Follow</Button>
+                      <Button variant="outline" size="sm" disabled={checkIfFollowing(person.id)} onClick={()=>followUser(person.id)}>{checkIfFollowing(person.id)?"Following":"Follow"}</Button>
                     </div>
-                    <p className="mt-2 text-sm">{person.bio}</p>
+                    <p className="mt-2 text-sm">{person.bio || "NO BIO IS GIVEN"}</p>
                     <p className="mt-1 text-sm text-muted-foreground">
-                      {person.followers.toLocaleString()} followers
+                      {person.followers?.toLocaleString() || 0} followers
                     </p>
                   </div>
                 </div>

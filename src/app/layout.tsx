@@ -43,7 +43,7 @@ export default function RootLayout({
           <AuthProvider >
           <Header />
           <main className="min-h-screen pt-16">{children}</main>
-          <Toaster />
+                 <Toaster />          
           </AuthProvider>
         </ThemeProvider>
         

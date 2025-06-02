@@ -24,8 +24,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useToast } from "@/hooks/use-toast";
-
+import {toast} from "sonner";
 
 const formSchema = z.object({
   title: z.string().min(3, "Title must be at least 3 characters"),
@@ -42,7 +41,6 @@ const formSchema = z.object({
 
 export default function CreateEventPage() {
   const router = useRouter();
-  const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const form = useForm({
@@ -65,18 +63,19 @@ export default function CreateEventPage() {
       // Simulate API call
       await new Promise(resolve => setTimeout(resolve, 1500));
       
-      toast({
-        title: "Event created",
-        description: "Your event has been created successfully.",
-      });
+     toast(
+  <>
+    <strong>Event created</strong>
+    <div>Your event has been created successfully.</div>
+  </>,
+  { variant: "success" }
+);
+
       
       router.push("/events");
     } catch (error) {
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: "Failed to create event. Please try again.",
-      });
+     toast.error("Failed to create event. Please try again.");
+
     } finally {
       setIsSubmitting(false);
     }

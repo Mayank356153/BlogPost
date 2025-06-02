@@ -29,8 +29,7 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { useToast } from "@/hooks/use-toast";
-
+import {toast} from "sonner";
 
 // Mock group data
 const mockGroup = {
@@ -125,7 +124,6 @@ export default function GroupPage() {
   const [newMessage, setNewMessage] = useState("");
   const [isMember, setIsMember] = useState(true);
   const [showLeaveDialog, setShowLeaveDialog] = useState(false);
-  const { toast } = useToast();
 
   const handleJoinLeave = () => {
     if (isMember) {
@@ -137,10 +135,14 @@ export default function GroupPage() {
 
   const handleJoin = () => {
     setIsMember(true);
-    toast({
-      title: "Welcome to the group!",
-      description: "You have successfully joined the group.",
-    });
+   
+    toast.success(<>
+    <strong>Welcome to the group!</strong>
+    <div>
+      You have successfully joined the group.
+    </div>
+    </>)
+    
   };
 
   const handleLeave = () => {
@@ -150,6 +152,13 @@ export default function GroupPage() {
       title: "Left group",
       description: "You have successfully left the group.",
     });
+     
+     toast.success(<>
+    <strong>Left Group</strong>
+    <div>
+You have successfully left the group.
+    </div>
+    </>)
   };
 
   const handleLike = (postId) => {

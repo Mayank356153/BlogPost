@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Separator } from "@/components/ui/separator";
-import { useToast } from "@/hooks/use-toast";
+import {toast} from "sonner"; 
 import {
   Card,
   CardContent,
@@ -40,7 +40,6 @@ import { useRouter } from "next/navigation";
 
 export default function SettingsPage() {
   const { user } = useAuth();
-  const { toast } = useToast();
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
@@ -50,16 +49,19 @@ export default function SettingsPage() {
     setIsLoading(true);
     try {
       await new Promise(resolve => setTimeout(resolve, 1000));
-      toast({
-        title: "Settings saved",
-        description: "Your settings have been updated successfully.",
-      });
+     
+
+      toast.success(<>
+        <strong>Settings saved!</strong>
+        <div>Your changes have been saved successfully.</div>
+      </>)
     } catch (error) {
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: "Failed to save settings. Please try again.",
-      });
+     
+
+      toast.error(<>
+        <strong>Error saving settings</strong>
+        <div>There was an issue saving your settings. Please try again later.</div>
+      </>)
     } finally {
       setIsLoading(false);
     }
@@ -69,44 +71,46 @@ export default function SettingsPage() {
     try {
       // Simulate sending password reset email
       await new Promise(resolve => setTimeout(resolve, 1000));
-      toast({
-        title: "Password reset email sent",
-        description: "Check your email for instructions to reset your password.",
-      });
+      
+      toast.success(<>
+        <strong>Password reset email sent!</strong>
+        <div>Check your email for instructions to reset your password.</div>
+      </>)
     } catch (error) {
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: "Failed to send password reset email. Please try again.",
-      });
+     
+
+
+      toast.error(<>
+        <strong>Error sending reset email</strong>
+        <div>There was an issue sending the password reset email. Please try again later.</div>
+      </>)
     }
   };
 
   const handleDeleteAccount = async () => {
     if (deleteConfirmation !== user?.email) {
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: "Please enter your email correctly to confirm deletion.",
-      });
+      
+      toast.error("Please enter your email correctly to confirm deletion.")
       return;
     }
 
     try {
       // Simulate account deletion
       await new Promise(resolve => setTimeout(resolve, 1500));
-      toast({
-        title: "Account deleted",
-        description: "Your account has been permanently deleted.",
-      });
+     
+
+      toast.success(<>
+        <strong>Account deleted successfully!</strong>
+        <div>Your account and all associated data have been removed.</div>
+      </>)
       router.push("/");
     } catch (error) {
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: "Failed to delete account. Please try again.",
-      });
-    } finally {
+    
+      toast.error(<>
+        <strong>Error deleting account</strong>
+        <div>There was an issue deleting your account. Please try again later.</div>
+      </>)
+     } finally {
       setShowDeleteDialog(false);
       setDeleteConfirmation("");
     }

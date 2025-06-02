@@ -17,7 +17,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { useAuth } from "@/components/auth/auth-provider";
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { 
   Card,
@@ -52,7 +52,6 @@ const formSchema = z.object({
 export default function EditProfilePage() {
   const { user } = useAuth();
   const router = useRouter();
-  const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
   const [avatarPreview, setAvatarPreview] = useState(user?.image || "");
 
@@ -84,19 +83,26 @@ export default function EditProfilePage() {
     try {
       // Simulate API call
       await new Promise(resolve => setTimeout(resolve, 1500));
-      
-      toast({
-        title: "Profile updated",
-        description: "Your profile has been updated successfully.",
-      });
+     
+
+      toast.success(<>
+        <strong>Profile Updated</strong>
+        <div>
+          Your profile has been updated successfully.
+        </div>
+      </>)
       
       router.push("/profile");
     } catch (error) {
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: "Failed to update profile. Please try again.",
-      });
+     
+
+
+      toast.error(<>
+        <strong>Update Failed</strong>
+        <div>
+          There was an error updating your profile. Please try again later. 
+        </div>
+      </>)
     } finally {
       setIsLoading(false);
     }

@@ -16,7 +16,7 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form';
-import { useToast } from '@/hooks/use-toast';
+import {toast} from 'sonner'; 
 import {useAuth} from "@/components/auth/auth-provider"
 
 const formSchema=z.object({
@@ -43,16 +43,19 @@ export default function ForgotPasswordPage(){
 
     //   await new Promise(resolve => setTimeout(resolve, 1500));
       setIsSubmitted(true);
-      toast({
-        title: 'Reset link sent',
-        description: 'Check your email for password reset instructions.',
-      });
+
+      toast(
+  <div>
+    <strong>Reset link sent</strong>
+    <div>Check your email for password reset instructions.</div>
+  </div>
+);
+
+
+      
     } catch (error) {
-      toast({
-        variant: 'destructive',
-        title: 'Error',
-        description: 'Failed to send reset link. Please try again.',
-      });
+      
+      toast.error("Failed to send reset link. Please try again.");
     } finally {
       setIsLoading(false);
     }

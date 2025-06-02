@@ -1,5 +1,5 @@
 "use client"
-
+import openai from "@/config/openai"
 import { useEffect, useState,useRef } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -7,6 +7,9 @@ import { z } from 'zod';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage"
+import { collection } from 'firebase/firestore';
+import { addDoc } from 'firebase/firestore';
+import { useRouter } from 'next/navigation';
 import { v4 as uuidv4 } from "uuid" // For unique filenames
 import { 
   Form, 
@@ -15,33 +18,109 @@ import {
   FormItem, 
   FormMessage 
 } from '@/components/ui/form';
+import { Skeleton } from "../ui/skeleton";
 import { getAuth } from 'firebase/auth';
+// import { useForm } from 'react-hook-form';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useAuth } from '@/components/auth/auth-provider';
-import { useToast } from '@/hooks/use-toast';
+import {toast} from 'sonner';
 import { Badge } from '@/components/ui/badge';
 import { X, ImagePlus, VideoIcon } from 'lucide-react';
 import { db } from '@/config/firebase';
-import { addDoc } from 'firebase/firestore';
-
+// import { addDoc } from 'firebase/firestore';
+import Upload from '@/helpers/upload';  
+import { Wand2 } from "lucide-react";
 const formSchema = z.object({
   content: z.string().min(1, "Post content can't be empty").max(500, "Post content can't exceed 500 characters"),
 });
 
+
+
+
 export default function PostCreateForm(){
+     const {reset}=useForm();
     const {user}=useAuth()
-    const{toast}=useToast()
+    const router=useRouter();
     const auth=getAuth()
       const [isSubmitting, setIsSubmitting] = useState(false);
  const [tags, setTags] = useState([[]])
   const [currentTag, setCurrentTag] = useState("")
   const [mediaFiles, setMediaFiles] = useState([])
-
+ const [suggestedTags, setSuggestedTags] = useState([]);
+  const [isGeneratingTags, setIsGeneratingTags] = useState(false);
  const imageInputRef = useRef(null)
+
+ 
+  const generateTags = async () => {
+if (!content || typeof content !== 'string' || content.trim().length < 10) {
+    toast.error(
+      <>
+        <strong>Content too short</strong>
+        <div>Please provide more content (at least 10 characters) to generate relevant tags.</div>
+      </>
+    );
+    return;
+  }
+
+   if (isGeneratingTags) return;
+    
+    setIsGeneratingTags(true);
+    try {
+        const prompt = `
+      Analyze the following content and suggest 5-10 relevant tags.
+      Return ONLY a comma-separated list of tags, nothing else.
+      Make the tags lowercase, concise, and relevant to tech/development when applicable.
+      
+      Content: "${content}"
+    `;
+
+     const response = await openai.chat.completions.create({
+      model: "gpt-4.1",
+      messages: [
+        { role: "system", content: "You are a helpful assistant that generates relevant tags for content." },
+        { role: "user", content: prompt }
+      ],
+      temperature: 0.5,
+      max_tokens: 60
+    });
+     const tagsString = response.choices[0]?.message?.content || '';
+    const newTags = tagsString.split(',')
+      .map(tag => tag.trim().toLowerCase())
+      .filter(tag => tag.length > 0);
+
+    if (newTags.length === 0) {
+      toast.info(
+        <>
+          <strong>No tags generated</strong>
+          <div>The AI couldn't extract relevant tags from your content.</div>
+        </>
+      );
+    }
+
+    setTags(newTags);
+    } catch (error) {
+     
+ console.error('OpenAI API error:', error);
+    toast.error(
+      <>
+        <strong>AI Service Error</strong>
+        <div>
+          {error.response?.data?.error?.message || 
+           'Failed to generate tags. Please try again later.'}
+        </div>
+      </>
+    );
+    } finally {
+      setIsGeneratingTags(false);
+    }
+  };
+  
 
   const handleImageClick = () => {
     imageInputRef.current?.click()
   }
+
+  
 
   const handleImageChange = (e) => {
     const file = e.target.files[0]
@@ -59,6 +138,9 @@ export default function PostCreateForm(){
         content:""
     }
   })
+
+  
+  const content  = form.watch("content");
 
 
   const addTag=()=>{
@@ -79,34 +161,38 @@ export default function PostCreateForm(){
             setTags((prev)=>prev.filter(tg=> tg!==tag))
   }
 
-  const addMediaFile=async(file)=>{
-    if(!file) return;
-
-const storage=getStorage();
-          const filename=`${uuidv4()}-${file.name}`
-        const storageRef=ref(storage,`images/${filename}`)
-        
-        const snapshot=await uploadBytes(storageRef,file)
-        const downloadURL=await getDownloadURL(snapshot.ref)
-        console.log(downloadURL)
-        console.log(contentTags)
-
-
-
-    
-    setMediaFiles((prev)=>[
-        ...prev,
-         file
-    ])
-    toast({
-      
-      message: "Your media has been added to the post.",
-    });
+  const addMediaFile = async (file) => {
+  if (!file) {
+   
+    toast.error(<>
+      <strong>No file selected</strong>
+      <div>Please choose a media file to upload.</div>
+    </>)
+    return;
   }
 
-  const removeFile=(fileNumber)=>{
-    setMediaFiles((prev)=>prev.filter(index=> index!== fileNumber))
-  }
+  setMediaFiles((prev) => [...prev, file]);
+
+ 
+  toast.success(<> 
+    <strong>Media added</strong>
+    <div>{file.name} has been added to your post.</div>
+  </>)
+};
+
+
+const removeFile = (fileNumber) => {
+  setMediaFiles((prev) => prev.filter((_, index) => index !== fileNumber));
+ toast(
+  <div style={{ color: 'red' }}>
+    <strong>Media removed</strong>
+    <div>The selected media has been removed from the post.</div>
+  </div>
+);
+
+  
+};
+
 
  const handleTagKeyDown = (e) => {
     if (e.key === 'Enter' || e.key === ' ') {
@@ -115,58 +201,84 @@ const storage=getStorage();
     }
   };
   
-  const onSubmit=async(data)=>{
-    if(!user) return ;
-    try {
-      ALERT("A")
-        setIsSubmitting(true)
-          const contentTags = data.content.match(/#(\w+)/g)?.map(tag => tag.substring(1)) || [];
 
-          const storage=getStorage();
-          const filename=`${uuidv4()}-${file.name}`
-        const storageRef=ref(storage,`images/${filename}`)
-        
-        const snapshot=await uploadBytes(storageRef,mediaFiles[0])
-        const downloadURL=await getDownloadURL(snapshot.ref)
-        console.log(downloadURL)
-        console.log(contentTags)
-        // const formData={
-        //     content:data,
-        //     createdAt:new Date(),
-        //     likesCount:0,
-        //     commentsCount:0,
-        //     sharesCount:0,
-        //     tags:tags
-        // }
-        // const currentUser=auth.currentUser
-        // const userId=user.uid
-        // const postRef=collection(db,"users",userId,"posts")
-        
-        // const docRef=await addDoc(postRef,formData)
-        
-        
-        
-        
-    } catch (error) {
-         toast({
-        variant: "destructive",
-        title: "Failed to create post",
-        description: "There was an error publishing your post. Please try again.",
-      });
-    }
-    finally{
-        setIsSubmitting(false)
-    }
+
+
+  
+  
+const onSubmit = async (data) => {
+  const currentUser = auth.currentUser;
+  if (!currentUser) return;
+
+  try {
+    setIsSubmitting(true);
+
+    const mediaUrls = await Promise.all(
+      mediaFiles.map(async (file) => await Upload(file))
+    );
+    
+    
+    console.log(mediaUrls)
+
+    const newPost = {
+      content: data.content,
+
+      
+      images: mediaUrls.flat(),
+      
+      createdAt: new Date(),
+      
+      userId: currentUser.uid, // or user.id
+
+      likesCount:0,
+      commentCount:0,
+      sharesCount:0,
+      isLiked:false,
+      tags: tags.length > 0 ? tags : [], // Use existing tags or empty array
+      
+    };
+
+    console.log(newPost)
+    // Reference to the user's "posts" subcollection
+    const userPostsRef = collection(db, "users", currentUser.uid, "posts");
+
+    // Add post to user's posts
+    await addDoc(userPostsRef, newPost);
+
+   toast.success(
+  <>
+    <strong>Post created</strong>
+    <div>Your post has been saved under your profile.</div>
+  </>
+);
+
+
+    
+
+    setMediaFiles([]);
+    reset();
+    setOpen(false)
+
+  } catch (error) {
+    console.error("Post creation error:", error);
+   
+
+    toast.error(<>
+      <strong>Post creation failed</strong>
+      <div>There was an error creating your post. Please try again.</div>
+    </>)
+  } finally {
+    setIsSubmitting(false);
   }
+};
 
   if(!user) return null;
   return (
-     <Form {...form}>
+    <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
         <div className="flex items-start gap-3">
           <Avatar>
-            {/* <AvatarImage src={user.image} alt={user.name} /> */}
-            <AvatarImage src={user.image} width='50' alt={user.name} />
+            <AvatarImage src={user.image} alt={user.name} width="50"/>
             <AvatarFallback>{user.name.charAt(0)}</AvatarFallback>
           </Avatar>
           <div className="flex-1">
@@ -194,10 +306,11 @@ const storage=getStorage();
           <div className="grid grid-cols-2 gap-2">
             {mediaFiles.map((file, index) => (
               <div key={index} className="relative overflow-hidden border rounded-md">
-                {file.type.includes('video') ? (
+                {file.name.includes('vimeo') ? (
                   <div className="relative pt-[56.25%]">
                     <iframe
                       src={URL.createObjectURL(file)}
+                      loading="lazy"
                       className="absolute top-0 left-0 w-full h-full"
                       title="Video content"
                       frameBorder="0"
@@ -229,7 +342,7 @@ const storage=getStorage();
         {/* Tags */}
         <div className="space-y-2">
           <div className="flex flex-wrap gap-2">
-            {tags.length>0 && tags?.map((tag) => (
+            {tags.map((tag) => (
               <Badge key={tag} variant="secondary" className="group">
                 #{tag}
                 <Button
@@ -244,6 +357,46 @@ const storage=getStorage();
               </Badge>
             ))}
           </div>
+          
+          {/* AI Suggested Tags */}
+          {content && (
+            <div className="space-y-2">
+              <div className="flex items-center gap-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={generateTags}
+                  disabled={isGeneratingTags || !content}
+                >
+                  <Wand2 className="w-4 h-4 mr-2" />
+                  {isGeneratingTags ? "Generating..." : "Suggest Tags"}
+                </Button>
+              </div>
+              
+              {isGeneratingTags ? (
+                <div className="flex gap-2">
+                  <Skeleton className="w-16 h-6" />
+                  <Skeleton className="w-20 h-6" />
+                  <Skeleton className="h-6 w-14" />
+                </div>
+              ) : suggestedTags.length > 0 && (
+                <div className="flex flex-wrap gap-2">
+                  {suggestedTags.map((tag) => (
+                    <Badge
+                      key={tag}
+                      variant="outline"
+                      className="cursor-pointer hover:bg-secondary"
+                      onClick={() => addTag(tag)}
+                    >
+                      #{tag}
+                    </Badge>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+          
           <div className="flex gap-2">
             <input
               type="text"
@@ -253,7 +406,7 @@ const storage=getStorage();
               placeholder="Add a tag"
               className="flex w-full px-3 py-1 text-sm transition-colors border rounded-md shadow-sm h-9 border-input bg-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
             />
-            <Button type="button" variant="outline" onClick={addTag}>
+            <Button type="button" variant="outline" onClick={() => addTag(currentTag)}>
               Add
             </Button>
           </div>
@@ -261,18 +414,19 @@ const storage=getStorage();
         
         <div className="flex items-center justify-between pt-2">
           <div className="flex gap-2">
-            <input
+              <input
         type="file"
         ref={imageInputRef}
         onChange={handleImageChange}
         style={{ display: "none" }}
       />
+            
             <Button 
               type="button" 
               variant="outline" 
               size="sm"
-              onClick={() => handleImageClick()}
-            >
+                onClick={() => handleImageClick()}
+             >
               <ImagePlus className="w-4 h-4 mr-2" />
               Image
             </Button>
@@ -281,7 +435,7 @@ const storage=getStorage();
               variant="outline" 
               size="sm"
               onClick={() => handleImageClick()}
-            >
+             >
               <VideoIcon className="w-4 h-4 mr-2" />
               Video
             </Button>
