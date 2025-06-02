@@ -94,10 +94,10 @@ export default function Header(){
             
             {user ? (
               <>
-                <Button size="icon" variant="ghost" className="relative">
+                {/* <Button size="icon" variant="ghost" className="relative">
                   <Bell className="w-5 h-5" />
                   <span className="absolute w-2 h-2 rounded-full top-1 right-1 bg-destructive"></span>
-                </Button>
+                </Button> */}
                 <Button size="icon" variant="ghost" asChild className="relative">
                   <Link href="/messages">
                     <MessageSquare className="w-5 h-5" />
@@ -122,19 +122,30 @@ export default function Header(){
                       </Avatar>
                     </Button>
                   </DropdownMenuTrigger>
+
+                  
                   <DropdownMenuContent align="end">
+                    
                     <DropdownMenuLabel>My Account</DropdownMenuLabel>
+                    
                     <DropdownMenuSeparator />
+                    
                     <DropdownMenuItem asChild>
                       <Link href="/profile">Profile</Link>
                     </DropdownMenuItem>
+
+                    
                     <DropdownMenuItem asChild>
                       <Link href="/settings">Settings</Link>
                     </DropdownMenuItem>
+                    
                     <DropdownMenuSeparator />
+                    
                     <DropdownMenuItem onClick={logoutUser}>
                       Log out
                     </DropdownMenuItem>
+                    
+                    
                   </DropdownMenuContent>
                 </DropdownMenu>
               </>
@@ -159,7 +170,7 @@ export default function Header(){
             >
               {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
             </Button>
-          </div>
+          </div> 
         </div>
         
         {/* Mobile Navigation */}

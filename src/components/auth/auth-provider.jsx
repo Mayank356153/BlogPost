@@ -255,10 +255,12 @@ const githubLogin=async()=>{
         image: user.photoURL || "",
         createdAt: new Date(),
       });
+
     }
 
-    
-                setUser(userSnap.data())
+                const userDoc=await getDoc(userRef)
+                setUser(userDoc.data())
+
                     router.push("/dashboard")
                      console.log("Signed in user:", user);
    
@@ -268,15 +270,32 @@ const githubLogin=async()=>{
 } 
 
 
-else {
-  console.warn("signInWithPopup returned no user.");
-}
+
 
 
   } catch (error) {
-  
-      console.error("GitHub sign-in error:", error?.code, error?.message);
-    
+     if (error.code === "auth/account-exists-with-different-credential") {
+      const email = error.customData.email;
+      const pendingCred = GithubAuthProvider.credentialFromError(error);
+
+      const methods = await fetchSignInMethodsForEmail(auth, email);
+      console.log(methods)
+      if (methods.includes("google.com")) {
+        alert("This email is already used with Google. Please sign in with Google to link GitHub.");
+
+        const googleProvider = new GoogleAuthProvider();
+        const googleResult = await signInWithPopup(auth, googleProvider);
+
+        // Link GitHub to the existing Google account
+        await linkWithCredential(googleResult.user, pendingCred);
+        alert("GitHub account linked to your Google account!");
+      } else {
+        alert("Email already used with a different provider. Please use the correct method.");
+      }
+    } else {
+      console.error("GitHub sign-in error:", error);
+      alert("GitHub login failed.");
+    }  
   }
 }
 

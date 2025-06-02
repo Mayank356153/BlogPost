@@ -20,7 +20,6 @@ import {
 import { useAuth } from '@/components/auth/auth-provider';
 import { useToast } from '@/hooks/use-toast';
 import isEmail from "validator/lib/isEmail"
-
 const formSchema= z.object({
      email: z.string().email({ message: 'Please enter a valid email address.' }),
   password: z.string().min(6, { message: 'Password must be at least 6 characters.' }),
@@ -89,23 +88,11 @@ export default function LoginPage(){
         description: 'Successfully logged in with Github.',
       });
     } catch (error) {
-       if (error.code === "auth/account-exists-with-different-credential") {
-      const email = error.customData?.email;
-      console.log("JHH")
-       console.log(error.customData)
-      if (email) {
-        const methods = await fetchSignInMethodsForEmail(auth, email);
-        console.log(methods)
-        toast.error(
-          `Account exists with ${methods[0]} sign-in. Please use that instead.`
-        );
-      } else {
-        toast.error("This email is already used with another provider.");
-      }
-    } else {
-      toast.error("GitHub sign-in failed.");
-      console.error("GitHub sign-in error:", error?.code, error?.message);
-    }
+      toast({
+        variant: 'destructive',
+        title: 'Login failed',
+        description: 'Failed to login with Github. Please try again.',
+      });
     } finally {
       setIsLoading(false);
     }
@@ -114,8 +101,7 @@ export default function LoginPage(){
 
     
     return (
-
-     <div className="container mx-auto flex flex-col justify-center space-y-6 sm:w-[350px] pt-16">
+      <div className="container mx-auto flex flex-col justify-center space-y-6 sm:w-[350px] pt-16">
       <div className="flex flex-col space-y-2 text-center">
         <div className="mx-auto">
           <Layers className="w-10 h-10 text-primary" />
