@@ -71,12 +71,18 @@ export default function LoginPage(){
   const handleGoogleLogin = async () => {
     setIsLoading(true);
     try {
-      await googleLogin();
-     
+        const res= await googleLogin();
+        console.log(res)
+      
+          
       toast.success(<>
         <strong>Google login successful!</strong>
         <div>You have successfully logged in with Google.</div>
       </>)
+      return;
+      
+        
+         
     } catch (error) {
      
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState,useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -14,6 +14,8 @@ import {
   ChevronRight,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
+import fetchGroup from "@/lib/allGroups"
+
 const mockGroups = [
   {
     id: "1",
@@ -54,7 +56,12 @@ const mockGroups = [
 
 export default function GroupsPage() {
   const [searchQuery, setSearchQuery] = useState("");
-  const [groups, setGroups] = useState(mockGroups);
+  const [groups, setGroups] = useState([]);
+  useEffect(()=>{
+    const group=fetchGroup(setGroups)
+    return ()=>group();
+  })
+  useEffect(()=>console.log("Group",groups),[groups])
   const router = useRouter();
   return (
     <div className="container px-4 py-8 mx-auto">

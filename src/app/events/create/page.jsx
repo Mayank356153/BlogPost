@@ -9,6 +9,7 @@ import { Calendar, MapPin, Users, ImagePlus, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import Upload from "@/helpers/upload";
 import {
   Form,
   FormControl,
@@ -25,6 +26,9 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import {toast} from "sonner";
+import { db } from "@/config/firebase";
+import { useAuth } from "@/components/auth/auth-provider";
+import { addDoc, collection } from "firebase/firestore";
 
 const formSchema = z.object({
   title: z.string().min(3, "Title must be at least 3 characters"),
@@ -34,7 +38,7 @@ const formSchema = z.object({
   location: z.string().min(3, "Location is required"),
   type: z.enum(["online", "in-person", "hybrid"]),
   capacity: z.string().transform(Number),
-  image: z.string().url("Please enter a valid image URL"),
+  image: z.any().refine((file) => file instanceof File, { message: "Image is required" })
 });
 
 
@@ -42,7 +46,7 @@ const formSchema = z.object({
 export default function CreateEventPage() {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
-
+  const {user}=useAuth();
   const form = useForm({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -53,33 +57,57 @@ export default function CreateEventPage() {
       location: "",
       type: "in-person",
       capacity: "",
-      image: "",
+      image: null,
     },
   });
 
-  const onSubmit = async (values) => {
-    setIsSubmitting(true);
-    try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      
-     toast(
-  <>
-    <strong>Event created</strong>
-    <div>Your event has been created successfully.</div>
-  </>,
-  { variant: "success" }
-);
+ const onSubmit = async (values) => {
+  setIsSubmitting(true);
+  try {
+    if(!user) return toast.error("You must be logged in to create an event.");
+    console.log("Form values:", values);
 
-      
-      router.push("/events");
-    } catch (error) {
-     toast.error("Failed to create event. Please try again.");
-
-    } finally {
-      setIsSubmitting(false);
+    const imageUrl = await Upload(values.image);
+    if (!imageUrl) {
+      toast.error("Failed to upload image. Please try again.");
+      return;
     }
-  };
+
+    console.log("Uploaded image URL:", imageUrl);
+
+   
+    const eventDocRef = await addDoc(collection(db, "events"), {
+  title: values.title,
+  description: values.description,
+  date: values.date,
+  time: values.time,
+  location: values.location,
+  type: values.type,
+  capacity: values.capacity,
+  image: imageUrl,
+  author: user,
+  createdAt: new Date()
+});
+
+   console.log("Event created successfully:", eventDocRef);
+   
+    toast(
+      <>
+        <strong>Event created</strong>
+        <div>Your event has been created successfully.</div>
+      </>,
+      { variant: "success" }
+    );
+
+    router.push("/events");
+  } catch (error) {
+    console.error("Event creation error:", error);
+    toast.error("Failed to create event. Please try again.");
+  } finally {
+    setIsSubmitting(false);
+  }
+};
+
 
   return (
     <div className="container px-4 py-8 mx-auto">
@@ -221,27 +249,38 @@ export default function CreateEventPage() {
                 </FormItem>
               )}
             />
+
+
             
-            <FormField
-              control={form.control}
-              name="image"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Cover Image URL</FormLabel>
-                  <FormControl>
-                    <div className="relative">
-                      <ImagePlus className="absolute w-4 h-4 left-3 top-3 text-muted-foreground" />
-                      <Input 
-                        placeholder="Enter image URL"
-                        className="pl-10"
-                        {...field}
-                      />
-                    </div>
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+            
+          <FormField
+  control={form.control}
+  name="image"
+  render={({ field: { onChange, ref, name } }) => (
+    <FormItem>
+      <FormLabel>Cover Image</FormLabel>
+      <FormControl>
+        <div className="relative">
+          <ImagePlus className="absolute w-4 h-4 left-3 top-3 text-muted-foreground" />
+          <Input
+            type="file"
+            accept="image/*"
+            className="pl-10"
+            onChange={(e) => onChange(e.target.files?.[0])}
+            ref={ref}
+            name={name}
+          />
+        </div>
+      </FormControl>
+      <FormMessage />
+    </FormItem>
+  )}
+/>
+
+
+
+
+
             
             <div className="flex justify-end gap-4">
               <Button

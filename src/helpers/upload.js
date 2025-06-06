@@ -17,6 +17,7 @@ export default async function Upload (file)  {;
 
       return(response.data.secure_url);
     } catch (error) {
+      return null;
       console.error('Upload error:', error);
     }
   };

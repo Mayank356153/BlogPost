@@ -56,62 +56,60 @@ export  function AuthProvider({children}){
 
 
 //login user with email and password
-
-
 const LoginWithEmail = async (email, password) => {
-
   if (!isEmail(email) || !password.trim()) {
     toast.error("Please enter a valid email and password.");
     return;
   }
 
   try {
-    
-    console.log(email)
-    
+    console.log(email);
+
     const method = await fetchSignInMethodsForEmail(auth, email);
-   console.log(method)
+    console.log(method);
+
     if (method.length && !method.includes("password")) {
       toast.error(`This email is registered using ${method[0]}. Please sign in with that method.`);
-      return ;
+      return;
     }
 
-    
     const userCredential = await signInWithEmailAndPassword(auth, email, password);
     const user = userCredential.user;
 
-    // if (!user.emailVerified) {
-    //   await sendEmailVerification(user);
-    //   toast.error("Verify your email first. A verification link has been sent.");
-    //   return ;
-    // }
+    if (user.emailVerified) {
+      const userRef = doc(db, "users", user.uid);
+      const userSnap = await getDoc(userRef);
 
+      if (!userSnap.exists()) {
+        toast.error("User data not found in Firestore.");
+        return;
+      }
 
-       if (user.emailVerified) {
-              const userRef = doc(db, "users", user.uid);
-    const userSnap = await getDoc(userRef);
-    
-                setUser(userSnap.data())
-                setCurrentUser(auth.currentUser)
-                    router.push("/dashboard")
-    } else { 
-      console.log(user)
-            toast.error("Verify your email first. A verification link has been sent.");
+      const userData = userSnap.data();
+
+      setUser(userData);
+      setCurrentUser(auth.currentUser);
+
+      // ✅ Check for empty interests array
+      if (!userData.interests || userData.interests.length === 0) {
+        router.push("/interests");
+      } else {
+        router.push("/dashboard");
+      }
+
+    } else {
+      console.log(user);
+      toast.error("Verify your email first. A verification link has been sent.");
       setUser(null);
     }
-    
-                
-  
-  
-        console.log("Signed in user:", user);
 
-
-   return;
+    console.log("Signed in user:", user);
+    return;
 
   } catch (error) {
     console.log(`Login failed: ${error.code}`);
-    }
-
+    toast.error("Login failed. Please check your credentials.");
+  }
 };
 
 //signup user with email and password

@@ -1,91 +1,104 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import PropTypes from 'prop-types'
 import {Avatar,AvatarImage,AvatarFallback} from "@/components/ui/avatar"
 import {Button} from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea";
-import { formatDistanceToNow } from "date-fns";
+import { add, formatDistanceToNow, set } from "date-fns";
 import {useAuth} from "@/components/auth/auth-provider"
 import {Heart,Reply} from "lucide-react"
 import {cn} from "@/lib/utils"
+import { useId } from "react"
+import {
+  doc,
+  getDoc,
+  updateDoc,
+  arrayUnion,
+  serverTimestamp,
+} from "firebase/firestore";
+import { db } from "@/config/firebase";
+import { toast } from "sonner";
 
-// Mock comments data
-const mockComments = {
-  "1": [
-    {
-      id: "101",
-      author: {
-        id: "5",
-        name: "Michael Scott",
-        username: "michaels",
-        image: "https://images.pexels.com/photos/2379005/pexels-photo-2379005.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
-      },
-      content: "Great work! Which packages did you use for the authentication UI?",
-      createdAt: "2025-04-15T15:10:00Z",
-      likesCount: 3,
-      isLiked: false,
-    },
-    // ... (rest of the mock comments remain the same)
-  ],
-  // ... (other comment threads remain the same)
-};
-
-export default function CommentSection({postId}){
+export default function CommentSection({post}){
     const {user}=useAuth();
-    const[comments,setComments]=useState(mockComments[postId] || [])
+    const[commentsView,setCommentsView]=useState(post.comments || [])
     const[newComment,setNewComment]=useState("")
         const[isSubmitting,setIsSubmitting]=useState(false)
+const { currentUser} = useAuth(); // make sure it's inside your component
+const id=useId()
+  
 
+const addCommentToPost = async () => {
+  
+  if (!currentUser) return;
+  
+  if (!newComment.trim()) {
+    toast.error("Comment cannot be empty");
+    return;
+  }
 
-         const handleCommentSubmit = async () => {
-    if (!user || !newComment.trim()) return;
+  try {
+
+    console.log("Adding comment to post:", post);  
     
-    setIsSubmitting(true);
-    
-    // Simulate API call
-    setTimeout(() => {
-      const comment = {
-        id: `new-${Date.now()}`,
-        author: {
-          id: user.id,
-          name: user.name,
-          username: user.username || user.email.split('@')[0],
-          image: user.image,
-        },
-        content: newComment.trim(),
-        createdAt: new Date().toISOString(),
-        likesCount: 0,
-        isLiked: false,
-      };
-      
-      setComments([...comments, comment]);
-      setNewComment("");
-      setIsSubmitting(false);
-    }, 500);
-  };
+    const postRef = doc(db, `users/${post.author?.id}/posts/${post.post_id}`);
+    const postSnap = await getDoc(postRef);
 
-  const handleLikeComment = (commentId) => {
-    setComments(comments.map(comment => {
-      if (comment.id === commentId) {
-        const isLiked = !comment.isLiked;
-        return {
-          ...comment,
-          isLiked,
-          likesCount: isLiked ? comment.likesCount + 1 : comment.likesCount - 1,
-        };
-      }
-      return comment;
-    }));
-  };
+    if (!postSnap.exists()) {
+      alert("Post not found");
+      toast.error("Post not found");
+      return;
+    }
+
+    const newComments = {
+      content: newComment,
+      user_id: currentUser.uid,
+      createdAt: new Date(),
+      author: user,
+      likesCount:[]
+    };
+
+    await updateDoc(postRef, {
+      comments: arrayUnion(newComments),
+    });
+     setNewComment("");
+    
+    toast.success("Comment added!");
+  } catch (err) {
+    console.error("Error adding comment:", err);
+    toast.error("Failed to add comment");
+  }
+};
+
+useEffect(()=>setCommentsView(post.comments || []),[post.comments])
+        
+
+
+
+  // const handleLikeComment = (commentId) => {
+  //   setComments(comments.map(comment => {
+  //     if (comment.id === commentId) {
+  //       const isLiked = !comment.isLiked;
+  //       return {
+  //         ...comment,
+  //         isLiked,
+  //         likesCount: isLiked ? comment.likesCount + 1 : comment.likesCount - 1,
+  //       };
+  //     }
+  //     return comment;
+  //   }));
+  // };
+
+  
   return(
     <div className="p-4">
          {/* Comment input */}
       {user && (
         <div className="flex gap-3 mb-6">
           <Avatar>
-            <AvatarImage src={user.image} alt={user.name} />
-            <AvatarFallback>{user.name.charAt(0)}</AvatarFallback>
+            <AvatarImage src={user.image ||  "/blank-profile-picture-973460_1280.webp"} referrerPolicy="no-referrer"  alt={user.name} />
+            <AvatarFallback>{user.name?.charAt(0) ||"K"}</AvatarFallback>
           </Avatar>
           <div className="flex-1">
             <Textarea
@@ -96,7 +109,7 @@ export default function CommentSection({postId}){
             />
             <Button 
               size="sm" 
-              onClick={handleCommentSubmit}
+              onClick={()=>addCommentToPost()}
               disabled={!newComment.trim() || isSubmitting}
             >
               {isSubmitting ? "Posting..." : "Post comment"}
@@ -108,18 +121,18 @@ export default function CommentSection({postId}){
 
         {/* Comments list */}
       <div className="space-y-6">
-        {comments.map((comment) => (
-          <div key={comment.id} className="flex gap-3">
+        {commentsView.map((comment) => (
+          <div key={id} className="flex gap-3">
             <Avatar className="w-8 h-8">
-              <AvatarImage src={comment.author.image} alt={comment.author.name} />
-              <AvatarFallback>{comment.author.name.charAt(0)}</AvatarFallback>
+              <AvatarImage src={comment.author?.image ||  "/blank-profile-picture-973460_1280.webp"} alt={comment.author?.name || "ASd"} />
+              <AvatarFallback>{comment.author?.name.charAt(0) || "gff"}</AvatarFallback>
             </Avatar>
             <div className="flex-1">
               <div className="p-3 rounded-lg bg-muted">
                 <div className="flex items-center mb-1">
-                  <span className="text-sm font-medium">{comment.author.name}</span>
+                  <span className="text-sm font-medium">{comment.author?.name ||"JJJ"}</span>
                   <span className="ml-2 text-xs text-muted-foreground">
-                    @{comment.author.username}
+                    @{comment.author?.username || "JJ"}
                   </span>
                 </div>
                 <p className="text-sm">{comment.content}</p>
@@ -135,10 +148,10 @@ export default function CommentSection({postId}){
                       comment.isLiked && "fill-destructive text-destructive"
                     )} 
                   />
-                  <span>{comment.likesCount}</span>
+                  <span>{comment.likesCount.length}</span>
                 </button>
                 <span className="text-xs text-muted-foreground">
-                  {formatDistanceToNow(new Date(comment.createdAt), { addSuffix: true })}
+                  {formatDistanceToNow(new Date(comment.createdAt.toDate()), { addSuffix: true })}
                 </span>
                 <button className="flex items-center gap-1 text-xs text-muted-foreground">
                   <Reply className="h-3.5 w-3.5" />
@@ -156,7 +169,3 @@ export default function CommentSection({postId}){
   )
     
 }  
-
-CommentSection.PropTypes={
-    postId:PropTypes.string.isRequired
-}

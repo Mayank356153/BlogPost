@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -30,6 +30,8 @@ import {
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import {toast} from "sonner";
+import { doc, getDoc } from "firebase/firestore";
+import {db} from "@/config/firebase"
 
 // Mock group data
 const mockGroup = {
@@ -118,12 +120,39 @@ const mockMessages = [
 
 export default function GroupPage() {
   const params = useParams();
-  const [group] = useState(mockGroup);
+  const [group,setGroup] = useState(mockGroup);
   const [posts] = useState(mockPosts);
   const [messages, setMessages] = useState(mockMessages);
   const [newMessage, setNewMessage] = useState("");
   const [isMember, setIsMember] = useState(true);
   const [showLeaveDialog, setShowLeaveDialog] = useState(false);
+
+
+  useEffect(()=>{
+   const fetchGroupById = async (groupId) => {
+  try {
+    const groupRef = doc(db, "groups", groupId);
+    const docSnap = await getDoc(groupRef);
+
+    if (docSnap.exists()) {
+      setGroup({ id: docSnap.id, ...docSnap.data() });
+      return;
+    } else {
+      console.warn("No such group found!");
+      return null;
+    }
+  } catch (error) {
+    console.error("Error fetching group:", error);
+    throw error;
+  }
+};
+
+
+const id=params.id
+fetchGroupById(id)
+  },[])
+
+  useEffect(()=>console.log(group),[group])
 
   const handleJoinLeave = () => {
     if (isMember) {

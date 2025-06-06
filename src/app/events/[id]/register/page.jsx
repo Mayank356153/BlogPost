@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -19,7 +19,9 @@ import {
 } from "@/components/ui/form";
 import {toast} from "sonner";
 import { Badge } from "@/components/ui/badge";
-
+import { db } from "@/config/firebase";
+import { doc, getDoc, updateDoc } from "firebase/firestore";
+import { useAuth } from "@/components/auth/auth-provider";
 const formSchema = z.object({
      name: z.string().min(2, "Name must be at least 2 characters"),
   email: z.string().email("Please enter a valid email address"),
@@ -27,6 +29,8 @@ const formSchema = z.object({
   dietary: z.string().optional(),
   notes: z.string().optional(),
 });
+
+
 
 // Mock event data
 const mockEvent = {
@@ -47,8 +51,8 @@ export default function EventRegisterPage() {
 const params = useParams();
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [event] = useState(mockEvent);
-
+  const [event,setEvent] = useState({});
+  const { user } = useAuth();
     const form = useForm({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -60,12 +64,51 @@ const params = useParams();
     },
   });
 
+
+  useEffect( ()=>{
+  if(!user){
+    toast.error("You must be logged in to register for an event.");
+    router.push("/login");
+    return;
+  }
+    const fetchEventData = async () => {  
+              const eventId = params.id;
+    const eventRef=doc(db,"events",eventId);
+    const eventData=await getDoc(eventRef)
+    if(eventData.exists()){
+      setEvent(eventData.data());
+    } else {
+      toast.error("Event not found");
+      router.push("/events");
+    }
+    } 
+    fetchEventData();
+  },[])
+
+
+  
+
   const onSubmit = async (values) => {
     setIsSubmitting(true);
     try {
       // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      
+      console.log("Form values:", values);
+        
+      const eventRef=doc(db,"events",params.id);
+          console.log("Event reference:", eventRef);
+      await updateDoc(eventRef,{
+        attendees: event.attendees + 1,
+        capacity: event.capacity - 1,
+        attendeesList: [...(event.attendeesList || []), {
+          name: values.name,
+          email: values.email,
+          phone: values.phone,
+          dietary: values.dietary,
+          notes: values.notes,
+          registeredAt: new Date().toISOString(),
+          userId: user.id
+        }]
+      })
      toast(
   <>
     <strong>Registration successful</strong>
@@ -75,8 +118,9 @@ const params = useParams();
 );
 
       
-      router.push(`/events/${params.id}`);
+      router.push(`/events`);
     } catch (error) {
+      console.log("Event Registration error:", error);
      toast(
   <>
     <strong>Registration failed</strong>
@@ -116,7 +160,7 @@ const params = useParams();
                 </div>
                 <div className="flex items-center gap-2">
                   <Users className="w-4 h-4 text-muted-foreground" />
-                  <span>{event.attendees} attending • {event.capacity - event.attendees} spots left</span>
+                  <span>{event.attendees} attending • {event.capacity - (event.attendees || 0)} spots left</span>
                 </div>
               </div>
               <div className="flex items-center gap-2 mt-3">

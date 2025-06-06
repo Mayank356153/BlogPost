@@ -15,6 +15,11 @@ import {
   ExternalLink,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { useEffect } from "react";
+import { db } from "@/config/firebase";
+import { collection, onSnapshot } from "firebase/firestore";
+import { useAuth } from "@/components/auth/auth-provider";
+import {toast} from "sonner";
 const mockEvents = [
   {
     id: "1",
@@ -52,10 +57,49 @@ const mockEvents = [
   },
 ];
 
+
+
+
+
+
 export default function EventsPage() {
 const [searchQuery, setSearchQuery] = useState("");
-  const [events, setEvents] = useState(mockEvents);
+  const [events, setEvents] = useState([]);
     const Router = useRouter();
+  const { user } = useAuth(); 
+    
+     useEffect(() => {
+
+      if(!user){
+        toast.error("You must be logged in to view events.");
+        Router.push("/login");
+        return;
+      }
+    const eventsRef = collection(db, "events");
+
+    const unsubscribe = onSnapshot(eventsRef, (snapshot) => {
+      const eventsData = snapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+      setEvents(eventsData);
+      console.log("Events data:", eventsData);
+    });
+
+    return () => unsubscribe(); 
+  }, []);
+
+
+  const isRegistered=(eventId)=>{
+    console.log("Checking registration for u:", events)
+    const eventExists = events.find(event => event.id === eventId);
+const alreadyRegistered = eventExists.attendeesList?.some(
+  attendee => attendee.userId === user.id
+);
+    return alreadyRegistered ? true : false;
+    }
+
+
 
    return (
     <div className="container px-4 py-8 mx-auto">
@@ -99,7 +143,7 @@ const [searchQuery, setSearchQuery] = useState("");
               <div key={event.id} className="overflow-hidden border rounded-lg group">
                 <div className="relative">
                   <img
-                    src={event.image}
+                    src={event.image }  
                     alt={event.title}
                     className="object-cover w-full h-48"
                   />
@@ -131,12 +175,12 @@ const [searchQuery, setSearchQuery] = useState("");
                     </div>
                     <div className="flex items-center text-sm">
                       <Users className="w-4 h-4 mr-2 text-muted-foreground" />
-                      <span>{event.attendees} attending</span>
+                      <span>{event.attendees || 0} attending</span>
                     </div>
                   </div>
                   
                   <div className="flex flex-wrap gap-2 mb-4">
-                    {event.tags.map((tag) => (
+                    {event.tags?.map((tag) => (
                       <Badge key={tag} variant="secondary">
                         {tag}
                       </Badge>
@@ -146,17 +190,19 @@ const [searchQuery, setSearchQuery] = useState("");
                   <div className="flex items-center justify-between">
                     <div className="flex items-center">
                       <img
-                        src={event.organizer.image}
-                        alt={event.organizer.name}
+                        src={event.author.image || "/blank-profile-picture-973460_1280.webp"}
+                        alt={event.author.name}
                         className="w-6 h-6 mr-2 rounded-full"
                       />
                       <span className="text-sm text-muted-foreground">
-                        {event.organizer.name}
+                        {event.author.name}
                       </span>
                     </div>
-                    <Button onClick={()=>Router.push(`/events/${event.id}/register`)}>
-                      Register
-                      <ExternalLink className="w-4 h-4 ml-2" />
+                    <Button disabled={isRegistered(event.id)} onClick={()=>Router.push(`/events/${event.id}/register`)}>
+                      {isRegistered(event.id) ? "Registered" : "Register"}
+                      {
+                        isRegistered(event.id) ? null : <ExternalLink className="w-4 h-4 ml-2" />
+                      }
                     </Button>
                   </div>
                 </div>

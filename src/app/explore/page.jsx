@@ -8,59 +8,17 @@ import { Search, Users, Calendar, Hash } from "lucide-react";
 // import {Post} from "@/components/feed/feed-container"
 import  PostCard  from "@/components/post/post-card";
 import { db } from "@/config/firebase";
-import { collection, onSnapshot } from "firebase/firestore";
+import { collection, onSnapshot,document } from "firebase/firestore";
+import { getDoc } from "firebase/firestore";
 import { set } from "date-fns";
 import { updateDoc,doc,arrayUnion } from "firebase/firestore";
 import { useAuth } from "@/components/auth/auth-provider";
-
-const mockPosts = [
-  {
-    id: "e1",
-    author: {
-      id: "1",
-      name: "Tech Explorer",
-      username: "techexplorer",
-      image: "https://images.pexels.com/photos/2269872/pexels-photo-2269872.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
-    },
-    content: "Just discovered an amazing new feature in TensorFlow 2.0! Check out my tutorial on implementing custom training loops. #MachineLearning #TensorFlow",
-    images: [
-      "https://images.pexels.com/photos/8386440/pexels-photo-8386440.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
-    ],
-    createdAt: "2025-04-16T10:30:00Z",
-    likesCount: 45,
-    commentsCount: 12,
-    sharesCount: 8,
-    isLiked: false,
-    tags: ["MachineLearning", "TensorFlow", "Tutorial"],
-  },
-  {
-    id: "e2",
-    author: {
-      id: "2",
-      name: "Cloud Native",
-      username: "cloudnative",
-      image: "https://images.pexels.com/photos/1181686/pexels-photo-1181686.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
-    },
-    content: "Here's my comprehensive guide to deploying microservices with Kubernetes and Istio. Includes practical examples and best practices! #Kubernetes #CloudNative",
-    createdAt: "2025-04-15T15:45:00Z",
-    likesCount: 67,
-    commentsCount: 23,
-    sharesCount: 15,
-    isLiked: true,
-    tags: ["Kubernetes", "CloudNative", "Microservices"],
-  },
-];
+import { toast } from "sonner";
+import {fetchFollowedUsersPosts} from "@/lib/allposts";
+import { useAllUsers } from "@/lib/useAllUsers";
+import fetchTopics from "@/lib/allTopics"
 
 
-
-
-const topics = [
-  { name: "Flutter", posts: 1234, followers: 5678 },
-  { name: "Machine Learning", posts: 987, followers: 4321 },
-  { name: "Cloud Computing", posts: 765, followers: 3456 },
-  { name: "Web Development", posts: 543, followers: 2345 },
-  { name: "Android", posts: 432, followers: 1987 },
-];
 
 
 
@@ -86,12 +44,67 @@ const users=async(setPeople,current_id)=>{
 
 
 export default function ExplorePage() {
+
+  
   const [searchQuery,setSearchQuery]=useState("") 
-  const [posts, setPosts] = useState(mockPosts);
+  const [posts, setPosts] = useState([]);
+  const [topics,setTopics]=useState([])
   const[people,setPeople]=useState([])
+    const allUsers = useAllUsers();    // hook call at top level, not inside useEffect
   const {currentUser,user}=useAuth();
+  
   const[currentfollowing,setCurrentFollowing]=useState([])
   const[filteredPeople,setFilteredPeople]=useState([])
+
+useEffect(() => {
+  if (!currentUser || allUsers.length === 0) return;
+
+  console.log("currentUser", currentUser);
+
+  // Set up Firestore listener
+  const unsubscribe = fetchFollowedUsersPosts(
+    user.following || [],
+    allUsers,
+    setPosts
+  );
+
+  // Cleanup on unmount or dependency change
+  return () => {
+    console.log("Unsubscribing from posts listener");
+    unsubscribe();
+  };
+}, [currentUser, allUsers]);
+
+useEffect(()=>{
+    const unsubscribe = fetchTopics(setTopics);
+
+    return () => unsubscribe();
+},[])
+
+
+
+
+const handleTopicFollow = async (topicId) => {
+  try {
+    if (!currentUser) return;
+
+    const topicRef = doc(db, "topics", topicId);
+       const id=currentUser.uid
+    const res=await getDoc(topicRef)
+    console.log(res)
+    await updateDoc(topicRef, {
+      following: arrayUnion(id)
+    });
+
+    toast.success("Successfully following topic");
+  } catch (error) {
+    console.error("Unable to follow topic", error);
+    toast.error("Unable to follow topic");
+  }
+};
+
+
+  
 const handleLike = (postId) => {
     setPosts(posts.map(post => {
       if (post.id === postId) {
@@ -106,17 +119,24 @@ const handleLike = (postId) => {
     }));
   };
 
+  
   const followUser = async ( targetUserId) => {
   if (!currentUser.uid || !targetUserId) return;
 
   const currentUserRef = doc(db, "users", currentUser.uid);
 
+  const targetUserRef=doc(db,"users",targetUserId)
+  
   try {
     await updateDoc(currentUserRef, {
       following: arrayUnion(targetUserId),
     });
+    
+    await updateDoc(targetUserRef, {
+      followers: arrayUnion(currentUser.uid),})
+      
     setCurrentFollowing((prev) => [...prev, targetUserId]);
-    console.log("User followed!");
+    toast.success("You are now following this user!");
   } catch (error) {
     console.error("Error following user:", error);
   }
@@ -132,6 +152,8 @@ const checkIfFollowing = (targetUserId) => {
   return user.following?.includes(targetUserId) || currentfollowing.includes(targetUserId) || false;
   
 }
+
+
 
 useEffect(() => {
     const query = searchQuery.toLowerCase();
@@ -150,6 +172,9 @@ if (!query || query.trim() === "") {
 
     setFilteredPeople(filtered);
   }, [searchQuery,people]);
+
+
+  
 
   useEffect(()=>{
    users(setPeople,currentUser?.uid)
@@ -203,11 +228,11 @@ if (!query || query.trim() === "") {
                     <Hash className="w-5 h-5 text-primary" />
                     <h3 className="font-semibold">{topic.name}</h3>
                   </div>
-                  <Button variant="outline" size="sm" >Follow</Button>
+                  <Button variant="outline" size="sm" onClick={()=>handleTopicFollow(topic.id)} disabled={topic.following.includes(currentUser.uid)} >{topic.following.includes(currentUser.uid)?"Following":"Follow"}</Button>
                 </div>
                 <div className="text-sm text-muted-foreground">
-                  <p>{topic.posts.toLocaleString()} posts</p>
-                  <p>{topic.followers.toLocaleString()} followers</p>
+                  {/* <p>{topic.posts.toLocaleString()} posts</p> */}
+                  <p>{topic.following?.length} followers</p>
                 </div>
               </div>
             ))}
@@ -222,8 +247,8 @@ if (!query || query.trim() === "") {
                 className="p-4 transition-colors border rounded-lg hover:bg-muted/50"
               >
                 <div className="flex items-start gap-3">
-                  <img
-                       src={person.image || "/blank-profile-picture-973460_1280.webp"}
+                  <img          
+                       src={person.image.l || "/blank-profile-picture-973460_1280.webp"}
                     alt={person.name}
                     className="object-cover w-12 h-12 rounded-full"
                   />
@@ -237,7 +262,7 @@ if (!query || query.trim() === "") {
                     </div>
                     <p className="mt-2 text-sm">{person.bio || "NO BIO IS GIVEN"}</p>
                     <p className="mt-1 text-sm text-muted-foreground">
-                      {person.followers?.toLocaleString() || 0} followers
+                      {person.followers?.length || 0} followers
                     </p>
                   </div>
                 </div>

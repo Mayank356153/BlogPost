@@ -10,20 +10,18 @@ import {
 import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
 import { TrendingUp } from "lucide-react";
-import { useState } from "react";
-// Mock trending topics data
-const trendingTopics = [
-  { id: 1, name: "Flutter", count: 325 },
-  { id: 2, name: "Firebase", count: 248 },
-  { id: 3, name: "React", count: 211 },
-  { id: 4, name: "Android", count: 189 },
-  { id: 5, name: "TensorFlow", count: 176 },
-];
+import { useState,useEffect } from "react";
+import trendingTopics from "@/lib/TrendingTopics"
 
 export default function TrendingTopics(){
 
-    const[topics,setTopics]=useState(trendingTopics)
-    console.log(trendingTopics)
+  const[topics,setTopics]=useState([])
+  useEffect(()=>{
+     const unsubscribe = trendingTopics(setTopics);
+    return () => unsubscribe(); // Cleanup listener on unmount
+  },[])
+  useEffect(()=>console.log("sssss",topics),[topics])
+
     return(
          <Card>
       <CardHeader className="pb-3">
@@ -40,7 +38,7 @@ export default function TrendingTopics(){
               <Badge variant="secondary" className="px-3 py-1 text-sm hover:bg-secondary/80">
                 #{topic.name}
                 <span className="ml-1 text-xs text-muted-foreground">
-                  {topic.count}
+                  {topic.following?.length}
                 </span>
               </Badge>
             </Link>

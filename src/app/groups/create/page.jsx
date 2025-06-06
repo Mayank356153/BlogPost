@@ -25,14 +25,20 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { toast } from "sonner";
+import { useAuth } from "@/components/auth/auth-provider";
+import Upload from "@/helpers/upload";
+import { db } from "@/config/firebase";
+import { addDoc,collection } from "firebase/firestore";
 const formSchema = z.object({
   name: z.string().min(3, "Name must be at least 3 characters"),
   description: z.string().min(10, "Description must be at least 10 characters"),
   category: z.string().min(1, "Please select a category"),
   type: z.enum(["public", "private"]),
-  image: z.string().url("Please enter a valid image URL"),
-  coverImage: z.string().url("Please enter a valid cover image URL"),
+  image: z.any().refine((file) => file instanceof File, { message: "Image is required" }),
+  coverImage: z.any().refine((file) => file instanceof File, { message: "Cover Image is required" }),
 });
+
+
 
 const categories = [
   "Mobile Development",
@@ -46,10 +52,12 @@ const categories = [
   "Data Science",
 ];
 
+
+
 export default function CreateGroupPage() {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
-
+  const {user,currentUser}=useAuth();
   const form = useForm({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -57,8 +65,8 @@ export default function CreateGroupPage() {
       description: "",
       category: "",
       type: "public",
-      image: "",
-      coverImage: "",
+      image: null,
+      coverImage: null,
     },
   });
 
@@ -66,12 +74,54 @@ export default function CreateGroupPage() {
     setIsSubmitting(true);
     try {
       // Simulate API call
+       if(!user) return toast.error("You must be logged in to create an event.");
+    console.log("Form values:", values);
+
+
+     const imageUrl = await Upload(values.image);
+     const coverImageUrl=await Upload(values.coverImage)
+        if (!imageUrl || !coverImageUrl) {
+      toast.error("Failed to upload image. Please try again.");
+      return;
+    }
+
+    const topicRef=await addDoc(collection(db,"groups"),{
+      name:values.name,
+       description: values.description,
+      category: values.category,
+      type: values.type,
+      image: imageUrl,
+      coverImage: coverImageUrl,
+      members:1,
+      activity:{
+        posts:0,
+        events:0
+      },
+      admins:user,
+      recentMembers:[],
+    })
+
+ console.log("Group created successfully:", topicRef);
+   
+    toast(
+      <>
+        <strong>Group created</strong>
+        <div>Your group has been created successfully.</div>
+      </>,
+      { variant: "success" }
+    );
+
+    router.push("/groups");
+
+
+
+
+     
       await new Promise(resolve => setTimeout(resolve, 1500));
       
-      toast({
-        title: "Group created",
-        description: "Your group has been created successfully.",
-      });
+      
+
+      
 
       toast.success(<>
       <strong>Group Created</strong>
@@ -188,17 +238,20 @@ export default function CreateGroupPage() {
             <FormField
               control={form.control}
               name="image"
-              render={({ field }) => (
+              render={({ field:{onChange,ref,name} }) => (
                 <FormItem>
                   <FormLabel>Group Image URL</FormLabel>
                   <FormControl>
                     <div className="relative">
                       <ImagePlus className="absolute w-4 h-4 left-3 top-3 text-muted-foreground" />
-                      <Input 
-                        placeholder="Enter group image URL"
-                        className="pl-10"
-                        {...field}
-                      />
+                       <Input
+            type="file"
+            accept="image/*"
+            className="pl-10"
+            onChange={(e) => onChange(e.target.files?.[0])}
+            ref={ref}
+            name={name}
+          />
                     </div>
                   </FormControl>
                   <FormMessage />
@@ -209,17 +262,20 @@ export default function CreateGroupPage() {
             <FormField
               control={form.control}
               name="coverImage"
-              render={({ field }) => (
+              render={({ field:{onChange,ref,name} }) => (
                 <FormItem>
                   <FormLabel>Cover Image URL</FormLabel>
                   <FormControl>
                     <div className="relative">
                       <ImagePlus className="absolute w-4 h-4 left-3 top-3 text-muted-foreground" />
-                      <Input 
-                        placeholder="Enter cover image URL"
-                        className="pl-10"
-                        {...field}
-                      />
+                       <Input
+            type="file"
+            accept="image/*"
+            className="pl-10"
+            onChange={(e) => onChange(e.target.files?.[0])}
+            ref={ref}
+            name={name}
+          />
                     </div>
                   </FormControl>
                   <FormMessage />

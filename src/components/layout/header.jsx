@@ -63,7 +63,7 @@ export default function Header(){
           <div className="flex items-center">
             <Link href={`${user?"/dashboard":"/"}`} className="flex items-center space-x-2">
               <Layers className="w-8 h-8 text-primary" />
-              <span className="hidden text-xl font-bold sm:inline-block">GDG Social</span>
+              <span className="hidden text-xl font-bold sm:inline-block">Social</span>
             </Link>
           </div>
           
@@ -117,7 +117,7 @@ export default function Header(){
                   <DropdownMenuTrigger asChild>
                     <Button variant="ghost" className="relative w-8 h-8 rounded-full">
                       <Avatar className="w-8 h-8">
-                        <AvatarImage src={user.image || "/blank-profile-picture-973460_1280.webp" } alt={user.name} />
+                        <AvatarImage referrerPolicy="no-referrer" src={user.image || "/blank-profile-picture-973460_1280.webp" } alt={user.name} />
                         <AvatarFallback>{user.name.charAt(0)}</AvatarFallback>
                       </Avatar>
                     </Button>

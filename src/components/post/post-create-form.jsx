@@ -257,7 +257,6 @@ const onSubmit = async (data) => {
 
     setMediaFiles([]);
     reset();
-    setOpen(false)
 
   } catch (error) {
     console.error("Post creation error:", error);
@@ -306,7 +305,7 @@ const onSubmit = async (data) => {
           <div className="grid grid-cols-2 gap-2">
             {mediaFiles.map((file, index) => (
               <div key={index} className="relative overflow-hidden border rounded-md">
-                {file.name.includes('vimeo') ? (
+                {['mp4', 'mov', 'avi', 'mkv', 'webm', 'flv', 'wmv', 'mpeg', '3gp'].includes(file.name.split('.').pop().toLowerCase()) ? (
                   <div className="relative pt-[56.25%]">
                     <iframe
                       src={URL.createObjectURL(file)}
@@ -314,7 +313,7 @@ const onSubmit = async (data) => {
                       className="absolute top-0 left-0 w-full h-full"
                       title="Video content"
                       frameBorder="0"
-                      allow="autoplay; fullscreen; picture-in-picture"
+                      allow=" fullscreen; picture-in-picture"
                       allowFullScreen
                     ></iframe>
                   </div>
