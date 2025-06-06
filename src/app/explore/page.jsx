@@ -228,7 +228,7 @@ if (!query || query.trim() === "") {
                     <Hash className="w-5 h-5 text-primary" />
                     <h3 className="font-semibold">{topic.name}</h3>
                   </div>
-                  <Button variant="outline" size="sm" onClick={()=>handleTopicFollow(topic.id)} disabled={topic.following.includes(currentUser.uid)} >{topic.following.includes(currentUser.uid)?"Following":"Follow"}</Button>
+                  <Button variant="outline" size="sm" onClick={()=>handleTopicFollow(topic?.id)} disabled={topic?.following?.includes(currentUser?.uid)} >{topic?.following?.includes(currentUser?.uid)?"Following":"Follow"}</Button>
                 </div>
                 <div className="text-sm text-muted-foreground">
                   {/* <p>{topic.posts.toLocaleString()} posts</p> */}
@@ -248,7 +248,7 @@ if (!query || query.trim() === "") {
               >
                 <div className="flex items-start gap-3">
                   <img          
-                       src={person.image.l || "/blank-profile-picture-973460_1280.webp"}
+                       src={person.image || "/blank-profile-picture-973460_1280.webp"}
                     alt={person.name}
                     className="object-cover w-12 h-12 rounded-full"
                   />
