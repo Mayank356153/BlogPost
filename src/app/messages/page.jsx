@@ -605,7 +605,7 @@ export default function MessagesPage() {
                 </div>
 
                 {/* Messages */}
-                <ScrollArea className="flex-1">
+                <div className="flex-1 overflow-y-auto">
                   <div className="p-4 space-y-4">
                     {messages.map((message) => {
                       const isOwn = message.senderId === user?.id;
@@ -630,7 +630,7 @@ export default function MessagesPage() {
                       );
                     })}
                   </div>
-                </ScrollArea>
+                </div>
 
                 {/* Message input */}
                 <div className="p-4 border-t">
