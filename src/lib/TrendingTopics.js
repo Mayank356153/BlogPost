@@ -1,4 +1,4 @@
-import { collection, onSnapshot, query } from "firebase/firestore";
+import { collection, onSnapshot} from "firebase/firestore";
 import { db } from "@/config/firebase";
 const trendingTopics = (callback) => {
   const topicsRef = collection(db, "topics");
