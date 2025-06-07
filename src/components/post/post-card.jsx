@@ -34,7 +34,7 @@ import { db } from "@/config/firebase";
 import { toast } from "sonner";
 import {motion, AnimatePresence} from "framer-motion";
 import { useRef,useEffect } from "react";
-export default function PostCard({post,onLike}){
+export default function PostCard({post,group=false,groupId=""}){
     const [showComments,setShowComments]=useState(false)
 const [currentMediaIndex, setCurrentMediaIndex] = useState(0);
   const [isDragging, setIsDragging] = useState(false);
@@ -131,18 +131,29 @@ const { currentUser } = useAuth(); // make sure it's inside your component
 
 const handleLike = async (postId, targetUserId) => {
   if (!currentUser) return;
-  const postRef = doc(db, `users/${targetUserId}/posts/${postId}`);
-  if (!postRef) {
-    console.error("Post reference not found");
-    return;
+  alert(group)
+let postRef;
+  if(!group){
+     postRef = doc(db, `users/${targetUserId}/posts/${postId}`);
+  }else{
+    postRef=doc(db,"groups",groupId,"posts",post.id)
   }
+   if (!postRef) {
+      console.error("Post reference not found");
+      return;
+    }
   try {
     const postSnap = await getDoc(postRef);
     if (!postSnap.exists()) return;
+    
     const postData = postSnap.data();
+    
     console.log(postData)
+    
     const likedBy = postData.likedBy || [];
+    
     const isLiked = likedBy.includes(currentUser.uid);
+    
     // Update in Firestore
     await updateDoc(postRef, {
       likedBy: isLiked
@@ -168,10 +179,17 @@ const handleSavedPost = async (postId, targetUserId) => {
  try {
    if(!currentUser) return;
      const currerentUSerRef=doc(db,"users",currentUser.uid);
-     
-     await updateDoc(currerentUSerRef,{
+     if(!group){
+       await updateDoc(currerentUSerRef,{
        savedPosts: arrayUnion(doc(db, `users/${targetUserId}/posts/${postId}`))
      });
+     }
+     else{
+       await updateDoc(currerentUSerRef,{
+       savedPosts: arrayUnion(doc(db, `groups/${groupId}/posts/${postId}`))
+     });
+     }
+    
  
      toast.success("Post saved successfully");
  } catch (error) {
@@ -187,10 +205,10 @@ const handleSavedPost = async (postId, targetUserId) => {
       {/* Post Header */}
       <div className="flex items-start justify-between p-4">
         <div className="flex items-start gap-3">
-          <Link href={`/profile/${post.author.username}`}>
+          <Link href={`/profile/${post?.author?.username}`}>
             <Avatar>
               {/* <img className="w-12" src={post.author.image} alt={post.author.name} /> */}
-                          <AvatarImage src={post.author.image} width='50' alt={post.author.name} />
+                          <AvatarImage   referrerPolicy="no-referrer" src={post.author.image} width='50' alt={post.author.name} />
 
               <AvatarFallback>{post.author.name.charAt(0)}</AvatarFallback>
             </Avatar>
@@ -371,7 +389,7 @@ className="flex overflow-x-auto snap-x snap-mandatory touch-pan-x hide-scrollbar
       {showComments && (
         <>
           <Separator />
-          <CommentSection post={post}  />
+          <CommentSection post={post}  group={true} groupId={groupId}/>
         </>
       )}
     </div>

@@ -23,7 +23,6 @@ export default function DashboardPage() {
       <WelcomeBanner />
 
       <div className="flex flex-col gap-6 lg:flex-row lg:gap-8">
-        {/* Main content */}
         <div className="flex-1 order-2 lg:order-1">
           <div className="sticky top-[4.5rem] z-10 bg-background/80 backdrop-blur-sm pb-4 flex items-center justify-between border-b mb-6">
             <h2 className="text-xl font-bold sm:text-2xl">Your Feed</h2>
@@ -32,7 +31,6 @@ export default function DashboardPage() {
           <FeedContainer />
         </div>
 
-        {/* Sidebar */}
         <div className="order-1 w-full lg:w-80 lg:order-2">
           <div className="sticky top-[4.5rem] space-y-6">
             <TrendingTopics />

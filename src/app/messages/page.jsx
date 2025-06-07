@@ -210,99 +210,13 @@ export default function MessagesPage() {
             </ScrollArea>
           </div>
 
-          {/* Chat area */}
-          {/* <div className={`flex-1 flex flex-col ${!showChatList ? 'block' : 'hidden sm:flex'}`}> */}
-            {/* {selectedUser ? (
-              <> */}
-                {/* Chat header */}
-                {/* <div className="flex items-center justify-between px-2 py-2 border-b">
-                  <div className="flex items-center gap-3">
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="mr-2 sm:hidden"
-                      onClick={handleBackToList}
-                    >
-                      <ArrowLeft className="w-5 h-5" />
-                    </Button>
-                    <Avatar>
-                      <AvatarImage 
-                        width="50" 
-                        referrerPolicy="no-referrer" 
-                        src={selectedUser?.image || "/blank-profile-picture-973460_1280.webp"} 
-                        alt={selectedUser?.name} 
-                      />
-                      <AvatarFallback>{selectedUser?.name?.charAt(0)}</AvatarFallback>
-                    </Avatar>
-                    <div> */}
-                      {/* <h3 className="font-medium">{selectedUser?.name}</h3>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Button variant="ghost" size="icon">
-                      <Phone className="w-5 h-5" />
-                    </Button>
-                    <Button variant="ghost" size="icon">
-                      <Video className="w-5 h-5" />
-                    </Button>
-                    <Button variant="ghost" size="icon">
-                      <MoreVertical className="w-5 h-5" />
-                    </Button>
-                  </div>
-                </div> */}
+        
 
-                {/* Messages */}
-                {/* <div className="flex-1 overflow-y-auto">
-                  <div className="p-4 space-y-4">
-                    {messages.map((message) => {
-                      const isOwn = message.senderId === user?.id;
-                      return (
-                        <div
-                          key={message.id}
-                          className={`flex ${isOwn ? "justify-end" : "justify-start"}`}
-                        >
-                          <div
-                            className={`max-w-[70%] rounded-lg p-3 ${
-                              isOwn
-                                ? "bg-primary text-primary-foreground"
-                                : "bg-muted"
-                            }`}
-                          >
-                            <p>{message.message}</p>
-                            <p className="mt-1 text-xs opacity-70">
-                              {message.timestamp && formatDistanceToNow(message.timestamp, { addSuffix: true })}
-                            </p>
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div> */}
-                {/* </div> */}
 
-                {/* Message input */}
-                {/* <div className="p-4 border-t">
-                  <form onSubmit={handleSendMessage} className="flex gap-2">
-                    <Input
-                      placeholder="Type a message..."
-                      value={newMessage}
-                      onChange={(e) => setNewMessage(e.target.value)}
-                    />
-                    <Button type="submit" disabled={!newMessage.trim()}>
-                      <Send className="w-4 h-4" />
-                    </Button>
-                  </form>
-                </div>
-              </>
-            ) : (
-              <div className="flex items-center justify-center flex-1 text-muted-foreground">
-                Select a chat to start messaging
-              </div>
-            )} */}
-          {/* </div> */}
+              
           <div className={`flex-1 flex flex-col ${!showChatList ? 'flex' : 'hidden sm:flex'}`}>
   {selectedUser ? (
     <>
-      {/* Chat header - made more compact for mobile */}
       <div className="sticky top-0 z-10 flex items-center justify-between px-3 py-2 border-b bg-background">
         <div className="flex items-center gap-2">
           <Button
@@ -341,7 +255,6 @@ export default function MessagesPage() {
         </div>
       </div>
 
-      {/* Messages - improved spacing for mobile */}
       <div className="flex-1 p-2 overflow-y-auto sm:p-4">
         <div className="space-y-2 sm:space-y-4">
           {messages.map((message) => {
@@ -369,7 +282,6 @@ export default function MessagesPage() {
         </div>
       </div>
 
-      {/* Message input - better mobile layout */}
       <div className="sticky bottom-0 p-2 border-t sm:p-4 bg-background">
         <form onSubmit={handleSendMessage} className="flex gap-2">
           <Input

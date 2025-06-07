@@ -32,20 +32,6 @@ const formSchema = z.object({
 
 
 
-// Mock event data
-const mockEvent = {
-  id: "1",
-  title: "Flutter Forward Extended",
-  description: "Join us for an extended session of Flutter Forward, where we'll dive deep into the latest Flutter features and best practices.",
-  date: "2025-05-15",
-  time: "10:00 AM",
-  location: "San Francisco, CA",
-  type: "hybrid",
-  image: "https://images.pexels.com/photos/2774556/pexels-photo-2774556.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
-  attendees: 150,
-  capacity: 200,
-  price: "Free",
-};
 
 export default function EventRegisterPage() {
 const params = useParams();

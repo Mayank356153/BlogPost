@@ -37,14 +37,14 @@ const formSchema = z.object({
 
 
 
-export default function PostCreateForm(){
+export default function PostCreateForm({groupId,onSuccess}){
       
      const {reset}=useForm();
     const {user}=useAuth()
     const router=useRouter();
     const auth=getAuth()
       const [isSubmitting, setIsSubmitting] = useState(false);
- const [tags, setTags] = useState([[]])
+ const [tags, setTags] = useState([])
   const [currentTag, setCurrentTag] = useState("")
   const [mediaFiles, setMediaFiles] = useState([])
  const [suggestedTags, setSuggestedTags] = useState([]);
@@ -228,8 +228,8 @@ const onSubmit = async (data) => {
       images: mediaUrls.flat(),
       
       createdAt: new Date(),
-      
-      userId: currentUser.uid, // or user.id
+      author:user,
+      groupId:groupId,
       likesCount:0,
       commentCount:0,
       sharesCount:0,
@@ -239,23 +239,17 @@ const onSubmit = async (data) => {
     };
 
     console.log(newPost)
-    const userPostsRef = collection(db, "users", currentUser.uid, "posts");
+    const userPostsRef = collection(db, "groups", groupId, "posts");
 
     // Add post to user's posts
     await addDoc(userPostsRef, newPost);
-
-   toast.success(
-  <>
-    <strong>Post created</strong>
-    <div>Your post has been saved under your profile.</div>
-  </>
-);
+    setMediaFiles([]);
+onSuccess();
 
 
     
 
-    setMediaFiles([]);
-    reset();
+
 
   } catch (error) {
     console.error("Post creation error:", error);

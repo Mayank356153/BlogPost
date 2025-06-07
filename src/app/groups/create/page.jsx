@@ -28,7 +28,7 @@ import { toast } from "sonner";
 import { useAuth } from "@/components/auth/auth-provider";
 import Upload from "@/helpers/upload";
 import { db } from "@/config/firebase";
-import { addDoc,collection } from "firebase/firestore";
+import { addDoc,arrayUnion,collection } from "firebase/firestore";
 const formSchema = z.object({
   name: z.string().min(3, "Name must be at least 3 characters"),
   description: z.string().min(10, "Description must be at least 10 characters"),
@@ -97,8 +97,9 @@ export default function CreateGroupPage() {
         posts:0,
         events:0
       },
-      admins:user,
+      admins:arrayUnion(user),
       recentMembers:[],
+      allUser:arrayUnion(user.id)
     })
 
  console.log("Group created successfully:", topicRef);

@@ -6,7 +6,6 @@ import { Button } from "@/components/ui/button";
 import { CheckCircle2, Calendar, MapPin, Users } from "lucide-react";
 
 
-// Mock event data
 const mockEvent = {
   id: "1",
   title: "Flutter Forward Extended",

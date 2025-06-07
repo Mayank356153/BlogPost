@@ -20,7 +20,7 @@ import {
 import { db } from "@/config/firebase";
 import { toast } from "sonner";
 
-export default function CommentSection({post}){
+export default function CommentSection({post, group=false,groupId}){
     const {user}=useAuth();
     const[commentsView,setCommentsView]=useState(post.comments || [])
     const[newComment,setNewComment]=useState("")
@@ -41,15 +41,18 @@ const addCommentToPost = async () => {
   try {
 
     console.log("Adding comment to post:", post);  
-    
-    const postRef = doc(db, `users/${post.author?.id}/posts/${post.post_id}`);
-    const postSnap = await getDoc(postRef);
 
-    if (!postSnap.exists()) {
-      alert("Post not found");
-      toast.error("Post not found");
-      return;
-    }
+     console.log(groupId)
+     console.log(post)
+     const postRef=groupId?doc(db, `groups/${groupId}/posts/${post.id}`):doc(db, `users/${post.author?.id}/posts/${post.post_id}`);
+    const postSnap = await getDoc(postRef);
+    
+
+    // if (!postSnap.exists()) {
+    //   alert("Post not found");
+    //   toast.error("Post not found");
+    //   return;
+    // }
 
     const newComments = {
       content: newComment,
