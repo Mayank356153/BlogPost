@@ -67,7 +67,12 @@ const LoginWithEmail = async (email, password) => {
   
      
         router.push("/dashboard");
-      
+  toast.success(<>
+        <strong>Welcome back!</strong>
+        <div>You have successfully logged in.</div>
+      </>)
+
+           
 
     } else {
       console.log(user);
@@ -115,9 +120,16 @@ const userRef = doc(db, "users", user.uid);
     await sendEmailVerification(user);
 
     toast.success("Verification email sent successfully");
-
+     
     router.push("/login");
-
+ toast(
+  <>
+    <strong>Account created!</strong>
+    <div>You have successfully signed up.</div>
+  </>,
+  { variant: 'success' }
+);
+      
     return {
       success: true,
       message: "Signup successful. Verification email sent."
@@ -194,7 +206,17 @@ const googleLogin=async()=>{
     
                 setUser(userSnap.data())
                 setCurrentUser(auth.currentUser)
+
+                      
+
+
+
                     router.push("/dashboard")
+
+                    toast.success(<>
+        <strong>Google login successful!</strong>
+        <div>You have successfully logged in with Google.</div>
+      </>)
     console.log("Signed in user:", user);
     } else { 
       console.log(user)
@@ -204,6 +226,7 @@ const googleLogin=async()=>{
  
   } catch (error) {
     console.error("Google sign-in error:", error?.code, error?.message);
+    
   }
 }
 
@@ -240,6 +263,13 @@ const githubLogin=async()=>{
                 setCurrentUser(auth.currentUser)
 
                     router.push("/dashboard")
+
+
+
+                     toast.success(<>
+        <strong>Github login successful!</strong>
+        <div>You have successfully logged in with Github.</div>
+      </>)
                      console.log("Signed in user:", user);
    
 

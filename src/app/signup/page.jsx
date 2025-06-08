@@ -48,13 +48,7 @@ export default function SignupPage() {
         try {
             await signUpWithEmail(values.name,values.email,values.password);
             
-          toast(
-  <>
-    <strong>Account created!</strong>
-    <div>You have successfully signed up.</div>
-  </>,
-  { variant: 'success' }
-);
+      
 
         }
          catch (error) {

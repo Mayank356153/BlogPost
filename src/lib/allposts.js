@@ -1,30 +1,27 @@
 import { collection, onSnapshot } from "firebase/firestore";
 import { db } from "@/config/firebase";
 
-export function fetchFollowedUsersPosts(userIds, allUsers, setPosts) {
-  if (!Array.isArray(userIds) || userIds.length === 0 || !Array.isArray(allUsers)) {
-    console.warn("Invalid inputs to fetchFollowedUsersPosts");
-    return () => {};
-  }
+export function fetchFollowedUsersPosts(user, allUsers, setPosts) {
+ 
 
-  const followingUsers = allUsers.filter(user => userIds.includes(user.id));
+  const followingUsers = allUsers.filter(us => us.id!==user.id);
   console.log("Following Users:", followingUsers);
 
   const unsubscribeFunctions = [];
   const allUserPostsMap = {}; // { userId: [posts] }
 
-  followingUsers.forEach(user => {
-    const postsRef = collection(db, `users/${user.id}/posts`);
-    console.log(`Setting listener on users/${user.id}/posts`);
+  followingUsers.forEach(us => {
+    const postsRef = collection(db, `users/${us.id}/posts`);
+    console.log(`Setting listener on users/${us.id}/posts`);
 
     const unsubscribe = onSnapshot(postsRef, (snapshot) => {
       const userPosts = snapshot.docs.map(doc => ({
         post_id: doc.id,
         ...doc.data(),
-        author: user
+        author: us
       }));
 
-      allUserPostsMap[user.id] = userPosts;
+      allUserPostsMap[us.id] = userPosts;
 
       // Combine and shuffle all posts
       const combinedPosts = Object.values(allUserPostsMap)

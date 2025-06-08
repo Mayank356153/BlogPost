@@ -44,10 +44,10 @@ export default function LoginPage(){
         try {
             await LoginWithEmail(values.email,values.password)
         
-      toast.success(<>
-        <strong>Welcome back!</strong>
-        <div>You have successfully logged in.</div>
-      </>)
+      // toast.success(<>
+      //   <strong>Welcome back!</strong>
+      //   <div>You have successfully logged in.</div>
+      // </>)
         } catch (error) {
              toast({
         variant: 'destructive',
@@ -74,11 +74,6 @@ export default function LoginPage(){
         const res= await googleLogin();
         console.log(res)
       
-          
-      toast.success(<>
-        <strong>Google login successful!</strong>
-        <div>You have successfully logged in with Google.</div>
-      </>)
       return;
       
         
@@ -103,10 +98,7 @@ export default function LoginPage(){
      
 
 
-      toast.success(<>
-        <strong>Github login successful!</strong>
-        <div>You have successfully logged in with Github.</div>
-      </>)
+     
     } catch (error) {
      
 
