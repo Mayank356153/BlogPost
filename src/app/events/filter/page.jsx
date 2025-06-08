@@ -108,7 +108,7 @@ export default function FilterPage() {
         )}
 
         <div className="grid gap-8">
-          {/* Date and Price Range */}
+          {/* price , date filter */}
           <div className="grid gap-6 sm:grid-cols-2">
             <div className="space-y-2">
               <Label>Date</Label>
@@ -147,8 +147,8 @@ export default function FilterPage() {
                   onValueChange={setPriceRange}
                 />
                 <div className="flex justify-between mt-2 text-sm text-muted-foreground">
-                  <span>${priceRange[0]}</span>
-                  <span>${priceRange[1]}</span>
+                  <span>{priceRange[0]}</span>
+                  <span>{priceRange[1]}</span>
                 </div>
               </div>
             </div>
@@ -191,7 +191,7 @@ export default function FilterPage() {
             </div>
           </div>
 
-          {/* Technologies and Location */}
+          {/* Technologies,, Location */}
           <div className="grid gap-6 sm:grid-cols-2">
             <div className="space-y-2">
               <Label>Technologies</Label>
@@ -226,7 +226,7 @@ export default function FilterPage() {
             </div>
           </div>
 
-          {/* Search and Apply */}
+          {/* Search, Apply */}
           <div className="flex flex-col gap-4 sm:flex-row">
             <Input
               placeholder="Search by keywords..."

@@ -72,7 +72,7 @@ export default function EditProfilePage() {
   const handleAvatarChange = (e) => {
     const file = e.target.files?.[0];
     if (file) {
-      // In a real app, you would upload this to your storage service
+      
       const imageUrl = URL.createObjectURL(file);
       setAvatarPreview(imageUrl);
     }
@@ -81,7 +81,7 @@ export default function EditProfilePage() {
   const onSubmit = async (values) => {
     setIsLoading(true);
     try {
-      // Simulate API call
+
       await new Promise(resolve => setTimeout(resolve, 1500));
      
 

@@ -84,6 +84,7 @@ export default function CreateEventPage() {
   location: values.location,
   type: values.type,
   capacity: values.capacity,
+  attendees:0,
   image: imageUrl,
   author: user,
   createdAt: new Date()

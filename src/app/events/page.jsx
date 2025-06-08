@@ -20,43 +20,6 @@ import { db } from "@/config/firebase";
 import { collection, onSnapshot } from "firebase/firestore";
 import { useAuth } from "@/components/auth/auth-provider";
 import {toast} from "sonner";
-const mockEvents = [
-  {
-    id: "1",
-    title: "Flutter Forward Extended",
-    description: "Join us for an extended session of Flutter Forward, where we'll dive deep into the latest Flutter features and best practices.",
-    date: "2025-05-15",
-    time: "10:00 AM",
-    location: "San Francisco, CA",
-    type: "hybrid",
-    image: "https://images.pexels.com/photos/2774556/pexels-photo-2774556.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
-    attendees: 150,
-    capacity: 200,
-    tags: ["Flutter", "Mobile", "Development"],
-    organizer: {
-      name: "GDG San Francisco",
-      image: "https://images.pexels.com/photos/2379004/pexels-photo-2379004.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2"
-    }
-  },
-  {
-    id: "2",
-    title: "Cloud Next '25 Watch Party",
-    description: "Watch Google Cloud Next '25 keynotes and sessions together with fellow developers. Live discussions and networking included!",
-    date: "2025-06-20",
-    time: "9:00 AM",
-    location: "Virtual",
-    type: "online",
-    image: "https://images.pexels.com/photos/1181671/pexels-photo-1181671.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
-    attendees: 300,
-    capacity: 500,
-    tags: ["Cloud", "Google Cloud", "Virtual"],
-    organizer: {
-      name: "GDG Cloud",
-      image: "https://images.pexels.com/photos/1181686/pexels-photo-1181686.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2"
-    }
-  },
-];
-
 
 
 
@@ -129,7 +92,7 @@ const alreadyRegistered = eventExists.attendeesList?.some(
         </Button>
       </div>
 
-      {/* Event tabs */}
+      {/* Event tab */}
       <Tabs defaultValue="upcoming">
         <TabsList className="mb-8">
           <TabsTrigger value="upcoming">Upcoming</TabsTrigger>

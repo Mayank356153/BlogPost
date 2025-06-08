@@ -24,7 +24,7 @@ export function FollowingUsers() {
     //   setAllUsers(users);
     });
 
-    return () => unsubscribe(); // Clean up the listener
+    return () => unsubscribe(); 
   }, [currentUser]);
 
   return allUsers;

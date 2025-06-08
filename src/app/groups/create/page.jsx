@@ -73,7 +73,7 @@ export default function CreateGroupPage() {
   const onSubmit = async (values) => {
     setIsSubmitting(true);
     try {
-      // Simulate API call
+      
        if(!user) return toast.error("You must be logged in to create an event.");
     console.log("Form values:", values);
 
@@ -113,18 +113,7 @@ export default function CreateGroupPage() {
     );
 
     router.push("/groups");
-
-
-
-
-     
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      
-      
-
-      
-
-      toast.success(<>
+     toast.success(<>
       <strong>Group Created</strong>
       <div>
         Your group has been created successfully.

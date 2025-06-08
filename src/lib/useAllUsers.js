@@ -22,7 +22,7 @@ export function useAllUsers() {
       setAllUsers(users.filter((user) => user.id !== currentUser?.uid));
     });
 
-    return () => unsubscribe(); // Clean up the listener
+    return () => unsubscribe(); 
   }, [currentUser]);
 
   return allUsers;

@@ -7,11 +7,11 @@ export default async function Upload (file)  {;
 
     const formData = new FormData();
     formData.append('file', file);
-    formData.append('upload_preset', 'BlogPost'); // Replace with your preset
+    formData.append('upload_preset', 'BlogPost'); 
 
     try {
       const response = await axios.post(
-        'https://api.cloudinary.com/v1_1/dgwbhjalu/upload', // Replace your_cloud_name
+        'https://api.cloudinary.com/v1_1/dgwbhjalu/upload', 
         formData
       );
 

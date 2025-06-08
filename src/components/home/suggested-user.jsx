@@ -15,30 +15,7 @@ import {useAllUsers} from "@/lib/useAllUsers";
 import { db } from "@/config/firebase";
 import { doc, updateDoc, arrayUnion } from "firebase/firestore";
 import { toast } from "sonner";
-// Mock suggested users data
-// const suggestedUsers = [
-//   {
-//     id: 1,
-//     name: "Sophia Chen",
-//     username: "sophiachen",
-//     avatar: "https://images.pexels.com/photos/415829/pexels-photo-415829.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
-//     role: "Flutter Developer",
-//   },
-//   {
-//     id: 2,
-//     name: "James Wilson",
-//     username: "jameswil",
-//     avatar: "https://images.pexels.com/photos/2379004/pexels-photo-2379004.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
-//     role: "Firebase Expert",
-//   },
-//   {
-//     id: 3,
-//     name: "Olivia Johnson",
-//     username: "oliviaj",
-//     avatar: "https://images.pexels.com/photos/774909/pexels-photo-774909.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
-//     role: "Android Developer",
-//   },
-// ];
+
 
 
 function getTopUsersByFollowersArray(allUsers, limitCount = 5) {
@@ -101,7 +78,7 @@ const checkIfFollowing = (targetUserId) => {
   }
 
   const topUsers = getTopUsersByFollowersArray(allusers, 5);
-  // Filter out users the currentUser is already following
+  
   const filteredTopUsers = topUsers.filter(
     (us) => !(user.following || []).includes(us.id)
   );

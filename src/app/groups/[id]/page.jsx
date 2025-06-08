@@ -39,117 +39,26 @@ import {toast} from "sonner"
 import  PostCreateForm  from "@/components/groups/group-post-create-form"
 import  GroupEventCreateForm  from "@/components/groups/group-event-create-form";
 import { db } from "@/config/firebase";
-import { getDoc } from "firebase/firestore";
+import { addDoc, getDoc } from "firebase/firestore";
 import { doc } from "firebase/firestore";
 import { useAuth } from "@/components/auth/auth-provider";
 import { useRouter } from "next/navigation";
+import { query,orderBy } from "firebase/firestore";
 import { updateDoc,increment,onSnapshot,collection } from "firebase/firestore";
-// Mock group data
-const mockGroup = {
-  id: "1",
-  name: "Flutter Developers",
-  description: "A community of Flutter enthusiasts sharing knowledge and best practices for cross-platform development.",
-  image: "https://images.pexels.com/photos/2582937/pexels-photo-2582937.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
-  coverImage: "https://images.pexels.com/photos/3861969/pexels-photo-3861969.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
-  members: 1500,
-  type: "public",
-  category: "Mobile Development",
-  activity: {
-    posts: 230,
-    events: 12,
-  },
-  admins: [
-    {
-      id: "1",
-      name: "Sarah Chen",
-      image: "https://images.pexels.com/photos/415829/pexels-photo-415829.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
-      role: "Admin"
-    }
-  ],
-  recentMembers: [
-    {
-      id: "2",
-      name: "Alex Kumar",
-      image: "https://images.pexels.com/photos/2379004/pexels-photo-2379004.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
-    },
-    {
-      id: "3",
-      name: "Emma Thompson",
-      image: "https://images.pexels.com/photos/762020/pexels-photo-762020.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
-    }
-  ]
-};
 
-// Mock posts
-const mockPosts = [
-  {
-    id: "1",
-    author: {
-      id: "1",
-      name: "Sarah Chen",
-      username: "sarahchen",
-      image: "https://images.pexels.com/photos/415829/pexels-photo-415829.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
-    },
-    content: "Excited to announce our next Flutter workshop! We'll be covering the latest features in Flutter 3.0. Don't forget to RSVP!",
-    images: [
-      "https://images.pexels.com/photos/2582937/pexels-photo-2582937.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
-    ],
-    createdAt: "2025-04-16T10:30:00Z",
-    likesCount: 42,
-    commentsCount: 7,
-    sharesCount: 3,
-    isLiked: false,
-    tags: ["Flutter", "Workshop", "MobileApp"],
-  }
-];
 
-// Mock messages
-const mockMessages = [
-  {
-    id: "1",
-    sender: {
-      id: "2",
-      name: "Alex Kumar",
-      image: "https://images.pexels.com/photos/2379004/pexels-photo-2379004.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
-    },
-    content: "Hey everyone! I'm working on a Flutter animation library. Would love to get your feedback!",
-    timestamp: "2025-04-16T15:30:00Z",
-  },
-  {
-    id: "2",
-    sender: {
-      id: "3",
-      name: "Emma Thompson",
-      image: "https://images.pexels.com/photos/762020/pexels-photo-762020.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
-    },
-    content: "That sounds interesting! Can you share more details about the features you're planning to include?",
-    timestamp: "2025-04-16T15:35:00Z",
-  },
-];
-
-// Mock events
-const mockEvents = [
-  {
-    id: "1",
-    title: "Flutter Forward Extended",
-    date: "2025-05-15",
-    time: "10:00 AM",
-    location: "San Francisco, CA",
-    image: "https://images.pexels.com/photos/2774556/pexels-photo-2774556.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
-    attendees: 150,
-  }
-];
 
 export default function GroupPage(props) {
      const { id } = use(props.params)
      const {user,currentUser}=useAuth();
   const [group,setGroup] = useState({});
   const router=useRouter()
-  const [posts,setPosts] = useState(mockPosts);
-  const [messages, setMessages] = useState(mockMessages);
+  const [posts,setPosts] = useState([]);
+  const[isSubmitting,setIsSubmitting]=useState(false)
+  const [messages, setMessages] = useState([]);
+  const [groupEvents,setGroupEvents]=useState([])
   const [newMessage, setNewMessage] = useState("");
-  const [isMember, setIsMember] = useState(false); // Start as not a member to show join functionality
-  const [isJoining, setIsJoining] = useState(false);
+  
   const [showLeaveDialog, setShowLeaveDialog] = useState(false);
   const [showCreatePostDialog, setShowCreatePostDialog] = useState(false);
   const [showCreateEventDialog, setShowCreateEventDialog] = useState(false);
@@ -161,6 +70,9 @@ export default function GroupPage(props) {
     if(!user) return;
 
     const postsRef = collection(db,"groups",id,"posts");
+   const eventRef=collection(db,"groups",id,"events")
+   const messageRef=collection(db,"groups",id,"messages")
+       const messagesQuery = query(messageRef, orderBy("timestamp"));
 
     const unsubscribe = onSnapshot(postsRef, (snapshot) => {
       const fetchedPosts = snapshot.docs.map((doc) => ({
@@ -168,20 +80,34 @@ export default function GroupPage(props) {
         ...doc.data(),
       }));
       setPosts(fetchedPosts);
-    
     });
-
-    return () => unsubscribe(); // clean up on unmount
+    
+     const eventunsubscribe=onSnapshot(eventRef,(snapshot)=>{
+      const fetchEvents=snapshot.docs.map((doc)=>({
+        id:doc.id,
+        ...doc.data()
+      }))
+      setGroupEvents(fetchEvents)
+     })
+    
+     const messageunsubscribe=onSnapshot(messagesQuery,(snapshot)=>{
+      const fetchMessages=snapshot.docs.map((doc)=>({
+        id:doc.id,
+        ...doc.data()
+      }))
+      console.log(fetchMessages.reverse())
+      setMessages(fetchMessages.reverse())
+     })
+    return () => {
+      unsubscribe();
+      eventunsubscribe();
+      messageunsubscribe();
+    } 
   }, [id]);
 
 
-  const handleJoinLeave = () => {
-    if (isMember) {
-      setShowLeaveDialog(true);
-    } else {
-      handleJoin();
-    }
-  };
+
+  
 
   
   useEffect(()=>{
@@ -204,38 +130,52 @@ export default function GroupPage(props) {
     if(id) fetchGroup()
   },[id])
 
-  const handleJoin = async () => {
-    setIsJoining(true);
+  
+
+
+  const handleSendMessage=async(e)=>{
+    e.preventDefault();
+    if(!id) return ;
+    if(!user) return ;
+    if(!newMessage) return ;
+    console.log("a")
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      setIsSubmitting(true)
+      const messageRef=collection(db,"groups",id,"messages")
+
+       await addDoc(messageRef,{
+        sender:user,
+        content:newMessage,
+        timestamp:new Date().toISOString(),
+       })
+       setNewMessage("")
+
+       toast.success("Message Sent Successfully.")
+
       
-      setIsMember(true);
-     toast.success("Welcome to the group!", {
-  description: `You have successfully joined ${group.name}.`,
-})
-
     } catch (error) {
-      toast({
-        variant: "destructive",
-        title: "Failed to join group",
-        description: "There was an error joining the group. Please try again.",
-      });
-    } finally {
-      setIsJoining(false);
+                console.log("Error in sending message",error)
+                toast.error("Error in sending message")      
+    } 
+    finally{
+      setIsSubmitting(false)
     }
-  };
+  }
 
+
+ 
  
    const handleLeave = async () => {
      try {
-       // Simulate API call
-       // await new Promise(resolve => setTimeout(resolve, 1000));
+  
        console.log(user)
        const groupRef=doc(db,"groups",group.id)
        const userRef=doc(db,"users",user.id)
        const removerUser=group.recentMembers.filter(member => member.id!==user.id)
+       console.log("a")
+
        const removerMember=group.allUser.filter(us=> us!==user.id)
+       console.log("B")       
        console.log("k")
        await updateDoc(groupRef,{
          recentMembers:removerUser,
@@ -243,8 +183,10 @@ export default function GroupPage(props) {
          allUser:removerMember
        })
    console.log("o")
- 
+             
        const groupRemove=user.groups.filter(gr=> gr!== group.id)
+
+       console.log("a")
        await updateDoc(userRef,{
          groups:groupRemove
        })
@@ -276,31 +218,11 @@ export default function GroupPage(props) {
      }
    };
 
-  const handleLike = (postId) => {
-    // Handle like functionality
-  };
-
-  const handleSendMessage = () => {
-    if (!newMessage.trim()) return;
-
-    const message = {
-      id: `msg-${Date.now()}`,
-      sender: {
-        id: "current-user",
-        name: "Current User",
-        image: "https://images.pexels.com/photos/2379005/pexels-photo-2379005.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
-      },
-      content: newMessage.trim(),
-      timestamp: new Date().toISOString(),
-    };
-
-    setMessages([...messages, message]);
-    setNewMessage("");
-  };
+  
 
   return (
     <div className="min-h-screen">
-      {/* Cover Image */}
+  
       <div className="relative w-full h-64">
         <img
           src={group?.coverImage}
@@ -310,7 +232,7 @@ export default function GroupPage(props) {
         <div className="absolute inset-0 bg-gradient-to-t from-background/80 to-transparent" />
       </div>
 
-      {/* Group Info */}
+  
       <div className="container relative z-10 px-4 mx-auto -mt-20">
         <div className="flex flex-col items-start gap-6 md:flex-row">
           <img
@@ -325,7 +247,7 @@ export default function GroupPage(props) {
                 <div className="flex items-center gap-4 text-muted-foreground">
                   <span className="flex items-center gap-1">
                     <Users className="w-4 h-4" />
-                    {group?.members?.toLocaleString()} members
+                    {group?.allUser?.length} members
                   </span>
                   <Badge variant="secondary">{group.type}</Badge>
                 </div>
@@ -351,7 +273,7 @@ export default function GroupPage(props) {
           </div>
         </div>
 
-        {/* Quick Actions Bar */}
+    
        
           <div className="p-4 mt-6 border rounded-lg bg-muted/50">
             <div className="flex flex-col gap-3 sm:flex-row">
@@ -383,7 +305,7 @@ export default function GroupPage(props) {
 
        
 
-        {/* Leave Group Dialog */}
+        
         <Dialog open={showLeaveDialog} onOpenChange={setShowLeaveDialog}>
           <DialogContent>
             <DialogHeader>
@@ -403,7 +325,7 @@ export default function GroupPage(props) {
           </DialogContent>
         </Dialog>
 
-        {/* Create Post Dialog */}
+        
         <Dialog open={showCreatePostDialog} onOpenChange={setShowCreatePostDialog}>
           <DialogContent className="sm:max-w-[600px]">
             <DialogHeader>
@@ -426,7 +348,7 @@ export default function GroupPage(props) {
           </DialogContent>
         </Dialog>
 
-        {/* Create Event Dialog */}
+  
         <Dialog open={showCreateEventDialog} onOpenChange={setShowCreateEventDialog}>
           <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
             <DialogHeader>
@@ -439,20 +361,20 @@ export default function GroupPage(props) {
               groupId={group.id}
               onSuccess={() => {
                 setShowCreateEventDialog(false);
-                toast({
-                  title: "Event created",
-                  description: "Your event has been created successfully.",
-                });
+                toast.success(<>
+                <strong>Event created</strong>
+                <div>Your event has been created successfully.</div>
+                </>)
               }} 
             />
           </DialogContent>
         </Dialog>
 
-        {/* Tabs */}
+  
         <Tabs defaultValue="discussion" className="mt-8">
           <TabsList>
             <TabsTrigger value="discussion">Discussion</TabsTrigger>
-            {isMember && <TabsTrigger value="chat">Chat</TabsTrigger>}
+             <TabsTrigger value="chat">Chat</TabsTrigger>
             <TabsTrigger value="events">Events</TabsTrigger>
             <TabsTrigger value="members">Members</TabsTrigger>
             <TabsTrigger value="about">About</TabsTrigger>
@@ -483,31 +405,48 @@ export default function GroupPage(props) {
             
           </TabsContent>
 
-          
-            <TabsContent value="chat" className="mt-6">
+         <TabsContent value="chat" className="mt-6">
               <div className="border rounded-lg">
                 {/* Chat messages */}
                 <div className="h-[400px] overflow-y-auto p-4 space-y-4">
-                  {messages.map((message) => (
-                    <div key={message.id} className="flex items-start gap-3">
-                      <Avatar>
-                        <AvatarImage src={message.sender.image} alt={message.sender.name} />
-                        <AvatarFallback>{message.sender.name.charAt(0)}</AvatarFallback>
-                      </Avatar>
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2">
-                          <span className="font-medium">{message.sender.name}</span>
-                          <span className="text-xs text-muted-foreground">
-                            {new Date(message.timestamp).toLocaleTimeString()}
-                          </span>
+                  {messages.map((message) => {
+                    const isCurrentUser = message.sender?.id===user?.id;
+                    // const isCurrentUser = true;
+                    
+                    return (
+                      <div 
+                        key={message.id} 
+                        className={`flex items-start gap-3 ${isCurrentUser ? 'flex-row-reverse' : ''}`}
+                      >
+                        <Avatar className="flex-shrink-0">
+                          <AvatarImage   referrerPolicy="no-referrer" src={message.sender?.image || "/blank-profile-picture-973460_1280.webp"} width='50' alt={message.sender?.name} />
+                          <AvatarFallback>{message.sender?.name?.charAt(0)}</AvatarFallback>
+                        </Avatar>
+                        <div className={`flex-1 max-w-[70%] ${isCurrentUser ? 'text-right' : ''}`}>
+                          <div className={`${isCurrentUser ? 'flex flex-col items-end' : ''}`}>
+                            <div className="flex items-center gap-2 mb-1">
+                              <span className="text-sm font-medium">{message.sender?.name}</span>
+                              <span className="text-xs text-muted-foreground">
+                                {new Date(message.timestamp).toLocaleTimeString()}
+                              </span>
+                            </div>
+                            <div 
+                              className={`rounded-lg p-3 ${
+                                isCurrentUser 
+                                  ? 'bg-primary text-primary-foreground' 
+                                  : 'bg-muted'
+                              }`}
+                            >
+                              <p className="text-sm">{message.content}</p>
+                            </div>
+                          </div>
                         </div>
-                        <p className="mt-1">{message.content}</p>
                       </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
 
-                {/* Message input */}
+            
                 <div className="p-4 border-t">
                   <div className="flex gap-2">
                     <Input
@@ -516,12 +455,11 @@ export default function GroupPage(props) {
                       onChange={(e) => setNewMessage(e.target.value)}
                       onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
                     />
-                    <Button onClick={handleSendMessage}>Send</Button>
+                    <Button onClick={handleSendMessage} disabled={isSubmitting}>{isSubmitting?"Sending":"Send"}</Button>
                   </div>
                 </div>
               </div>
             </TabsContent>
-        
 
           <TabsContent value="events" className="mt-6">
             <div className="flex items-center justify-between mb-6">
@@ -534,11 +472,11 @@ export default function GroupPage(props) {
               
             </div>
             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-              {mockEvents.map((event) => (
+              {groupEvents.map((event) => (
                 <div key={event.id} className="overflow-hidden border rounded-lg">
                   <img
-                    src={event.image}
-                    alt={event.title}
+                    src={event?.image}
+                    alt={event?.title}
                     className="object-cover w-full h-48"
                   />
                   <div className="p-4">
@@ -573,7 +511,7 @@ export default function GroupPage(props) {
                     <div key={admin.id} className="flex items-center justify-between">
                       <div className="flex items-center gap-3">
                         <Avatar>
-                          <AvatarImage src={admin?.image} alt={admin.name} />
+                          <AvatarImage src={admin?.image} alt={admin.name} width="50" />
                           <AvatarFallback>{admin?.name?.charAt(0)}</AvatarFallback>
                         </Avatar>
                         <div>
@@ -594,7 +532,7 @@ export default function GroupPage(props) {
                     <div key={member.id} className="flex items-center justify-between">
                       <div className="flex items-center gap-3">
                         <Avatar>
-                          <AvatarImage src={member?.image} alt={member?.name} />
+                          <AvatarImage src={member?.image} width="50" alt={member?.name} />
                           <AvatarFallback>{member?.name?.charAt(0)}</AvatarFallback>
                         </Avatar>
                         <div>
@@ -630,17 +568,19 @@ export default function GroupPage(props) {
                 <h3 className="mb-2 font-semibold">Activity</h3>
                 <div className="grid grid-cols-2 gap-4">
                   <div className="p-4 border rounded-lg">
-                    <p className="text-2xl font-bold">{group?.activity?.posts}</p>
+                    <p className="text-2xl font-bold">{posts.length}</p>
                     <p className="text-muted-foreground">Posts this month</p>
                   </div>
                   <div className="p-4 border rounded-lg">
-                    <p className="text-2xl font-bold">{group?.activity?.events}</p>
+                    <p className="text-2xl font-bold">{groupEvents.length}</p>
                     <p className="text-muted-foreground">Upcoming events</p>
                   </div>
                 </div>
               </div>
             </div>
           </TabsContent>
+
+          
         </Tabs>
       </div>
     </div>

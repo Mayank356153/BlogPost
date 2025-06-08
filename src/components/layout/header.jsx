@@ -30,9 +30,9 @@ export default function Header(){
            const pathname = usePathname();
   const [isScrolled, setIsScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [unreadMessages] = useState(2); // Mock unread messages count
+  const [unreadMessages] = useState(2); 
    
-   // Track scroll position
+   
   useEffect(() => {
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 10);
@@ -59,7 +59,7 @@ export default function Header(){
     >
       <div className="container px-4 mx-auto">
         <div className="flex items-center justify-between h-16">
-          {/* Logo */}
+        
           <div className="flex items-center">
             <Link href={`${user?"/dashboard":"/"}`} className="flex items-center space-x-2">
               <Layers className="w-8 h-8 text-primary" />
@@ -67,7 +67,7 @@ export default function Header(){
             </Link>
           </div>
           
-          {/* Desktop Navigation */}
+        
           <nav className="hidden space-x-1 md:flex">
             {user && navItems.map((item) => (
               <Button
@@ -81,7 +81,7 @@ export default function Header(){
             ))}
           </nav>
           
-          {/* Search and Actions */}
+        
           <div className="flex items-center gap-2">
             <div className="hidden md:flex relative w-full max-w-[200px] lg:max-w-xs">
               <Input
@@ -94,10 +94,7 @@ export default function Header(){
             
             {user ? (
               <>
-                {/* <Button size="icon" variant="ghost" className="relative">
-                  <Bell className="w-5 h-5" />
-                  <span className="absolute w-2 h-2 rounded-full top-1 right-1 bg-destructive"></span>
-                </Button> */}
+               
                 <Button size="icon" variant="ghost" asChild className="relative">
                   <Link href="/messages">
                     <MessageSquare className="w-5 h-5" />
@@ -161,7 +158,7 @@ export default function Header(){
               </>
             )}
             
-            {/* Mobile menu button */}
+          
             <Button 
               variant="ghost" 
               size="icon" 

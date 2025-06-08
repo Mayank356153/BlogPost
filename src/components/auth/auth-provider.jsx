@@ -27,32 +27,6 @@ export  function AuthProvider({children}){
     
     const auth=getAuth(app);
   
-// await setPersistence(auth, browserLocalPersistence);
-
-//     useEffect(() => {
-//   const unsubscribe = onAuthStateChanged(auth, async (person) => {
-//   if (person) {
-//     if (person.emailVerified) {
-//               const userRef = doc(db, "users", person.uid);
-//     const userSnap = await getDoc(userRef);
-    
-//                 setUser(userSnap.data())
-//                     router.push("/dashboard")
-//     } else { 
-//       console.log(person)
-//             toast.error("Verify your email first. A verification link has been sent.");
-//       setUser(null);
-//     }
-//   } else {
-//     await auth.signOut()
-//     setUser(null); // Not logged in
-//   }
-// });
-
-
-
-//   return () => unsubscribe(); // Clean up the listener
-// }, [auth]); // add dependency
 
 
 //login user with email and password
@@ -90,12 +64,10 @@ const LoginWithEmail = async (email, password) => {
       setUser(userData);
       setCurrentUser(auth.currentUser);
 
-      // ✅ Check for empty interests array
-      if (!userData.interests || userData.interests.length === 0) {
-        router.push("/interests");
-      } else {
+  
+     
         router.push("/dashboard");
-      }
+      
 
     } else {
       console.log(user);
@@ -229,11 +201,7 @@ const googleLogin=async()=>{
             toast.error("Verify your email first. A verification link has been sent.");
       setUser(null);
     }
-    // router.push("/dashboard")
-    // setUser(userSnap.data())
-
-
-   
+ 
   } catch (error) {
     console.error("Google sign-in error:", error?.code, error?.message);
   }

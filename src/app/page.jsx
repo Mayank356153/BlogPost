@@ -15,7 +15,7 @@ export default function Home() {
         <div className="container py-12 mx-auto text-center sm:py-16">
           <Layers className="w-12 h-12 mx-auto mb-4 sm:h-16 sm:w-16 text-primary sm:mb-6" />
           <h1 className="mb-4 text-3xl font-bold sm:text-4xl md:text-5xl lg:text-6xl sm:mb-6">
-            Welcome to Social
+            Welcome to GDG Social
           </h1>
           <p className="max-w-2xl px-4 mx-auto mb-6 text-lg sm:text-xl text-muted-foreground sm:mb-8">
             Connect with Google Developer Group members worldwide. Share knowledge,
@@ -32,7 +32,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Features Section */}
+    
       <section className="px-4 py-12 sm:py-16 bg-muted/50 sm:px-6">
         <div className="container mx-auto">
           <h2 className="mb-8 text-2xl font-bold text-center sm:text-3xl sm:mb-12">
@@ -71,7 +71,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Stats Section */}
+      
       <section className="px-4 py-12 sm:py-16 sm:px-6">
         <div className="container mx-auto">
           <div className="grid grid-cols-1 gap-8 text-center sm:grid-cols-3">
@@ -91,7 +91,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* CTA Section */}
+
       <section className="px-4 py-12 sm:py-16 bg-primary text-primary-foreground sm:px-6">
         <div className="container mx-auto text-center">
           <h2 className="mb-4 text-2xl font-bold sm:text-3xl sm:mb-6">Ready to get started?</h2>

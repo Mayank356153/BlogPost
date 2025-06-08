@@ -23,7 +23,11 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Calendar, MapPin, Users, ImagePlus, Clock } from 'lucide-react';
-
+import {toast} from "sonner"
+import { db } from '@/config/firebase';
+import { useAuth } from "@/components/auth/auth-provider";
+import { addDoc, collection } from "firebase/firestore";
+import Upload from '@/helpers/upload';
 const formSchema = z.object({
   title: z.string().min(3, "Title must be at least 3 characters"),
   description: z.string().min(10, "Description must be at least 10 characters"),
@@ -32,14 +36,14 @@ const formSchema = z.object({
   location: z.string().min(3, "Location is required"),
   type: z.enum(["online", "in-person", "hybrid"]),
   capacity: z.string().min(1, "Capacity is required").transform(Number),
-  image: z.string().url("Please enter a valid image URL"),
+  image:  z.any().refine((file) => file instanceof File, { message: "Image is required" })
 });
 
 
 
 export default function GroupEventCreateForm({ groupId, onSuccess } ){
   const [isSubmitting, setIsSubmitting] = useState(false);
-
+   const {user}=useAuth()
   const form = useForm({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -50,17 +54,39 @@ export default function GroupEventCreateForm({ groupId, onSuccess } ){
       location: "",
       type: "in-person" ,
       capacity: "",
-      image: "",
+      image: null,
     },
   });
 
   const onSubmit = async (values) => {
     setIsSubmitting(true);
     try {
-      // Simulate API call to create event in the group
-      await new Promise(resolve => setTimeout(resolve, 1500));
+       if(!user) return toast.error("You must be logged in to create an event.");
+    console.log("Form values:", values);
+        const imageUrl=await Upload(values.image)
+
+        if (!imageUrl) {
+      toast.error("Failed to upload image. Please try again.");
+      return;
+    }
+
+    console.log("Uploaded image URL:", imageUrl);
+        
+      const eventDocRef = await addDoc(collection(db, "groups",groupId,"events"), {
+  title: values.title,
+  description: values.description,
+  date: values.date,
+  time: values.time,
+  location: values.location,
+  type: values.type,
+  capacity: values.capacity,
+  image: imageUrl,
+  author: user,
+  createdAt: new Date()
+});
+    
       
-      // In a real app, you would send the data to your backend
+      
       console.log('Creating event for group:', groupId, values);
       
       onSuccess();
@@ -213,17 +239,20 @@ export default function GroupEventCreateForm({ groupId, onSuccess } ){
         <FormField
           control={form.control}
           name="image"
-          render={({ field }) => (
+          render={({ field:{onChange,ref,name} }) => (
             <FormItem>
               <FormLabel>Cover Image URL</FormLabel>
               <FormControl>
                 <div className="relative">
                   <ImagePlus className="absolute w-4 h-4 left-3 top-3 text-muted-foreground" />
-                  <Input
-                    placeholder="Enter image URL"
-                    className="pl-10"
-                    {...field}
-                  />
+                 <Input
+            type="file"
+            accept="image/*"
+            className="pl-10"
+            onChange={(e) => onChange(e.target.files?.[0])}
+            ref={ref}
+            name={name}
+          />
                 </div>
               </FormControl>
               <FormMessage />

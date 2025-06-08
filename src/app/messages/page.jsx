@@ -10,6 +10,7 @@ import { Search, Send, Phone, Video, MoreVertical, ArrowLeft } from "lucide-reac
 import { useAuth } from "@/components/auth/auth-provider";
 import { formatDistanceToNow } from "date-fns";
 import { FollowingUsers } from "@/lib/FollowingUsers";
+import {useAllUsers} from "@/lib/useAllUsers"
 import { db } from "@/config/firebase";
 import { 
   collection,
@@ -36,30 +37,38 @@ export default function MessagesPage() {
   const[filteredUsers,setFilteredUsers]=useState([])
   // Get chat ID by combining and sorting user IDs
   const getChatId = (a, b) => [a, b].sort().join("_");
+  const allPeople=useAllUsers()
 
   // Load following users
   useEffect(() => {
-    console.log("lk")
-    setUsers(followingUsers);
-  }, [followingUsers]);
+    
+        console.log("Aaaa")
+        console.log(allPeople)
+        setUsers(allPeople)
+  
+
+
+
+    
+  }, [allPeople]);
 
 
 
   useEffect(() => {
   if (!searchQuery.trim()) {
-    setFilteredUsers(followingUsers);
+    setFilteredUsers(allPeople);
   } else {
     setFilteredUsers(
-      followingUsers.filter(user =>
+      filteredUsers.filter(user =>
         user.name?.toLowerCase().includes(searchQuery.toLowerCase())
       )
     );
   }
-}, [followingUsers, searchQuery]);
+}, [allPeople, searchQuery]);
 
 
 
-  // Load messages when a user is selected
+
   useEffect(() => {
     if (!selectedUser || !user?.id) return;
     
@@ -81,7 +90,7 @@ export default function MessagesPage() {
 
 
   
-  // Mark messages as seen
+  // seen
   useEffect(() => {
     const markMessagesAsSeen = async () => {
       if (!selectedUser || !user?.id) return;

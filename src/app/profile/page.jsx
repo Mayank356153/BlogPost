@@ -12,72 +12,65 @@ import { Post } from "@/components/feed/feed-container";
 import PostCard from "@/components/post/post-card";
 import { ProfileAbout } from "@/components/profile/profile-about";
 import Link from "next/link";
+import { db } from "@/config/firebase";
+import { collection, doc, onSnapshot } from "firebase/firestore";
 
-// Mock posts data for the profile
-const mockUserPosts= [
-  {
-    id: "101",
-    author: {
-      id: "1",
-      name: "Demo User",
-      username: "demouser",
-      image: "https://images.pexels.com/photos/220453/pexels-photo-220453.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
-    },
-    content: "Just attended the Flutter Forward event. Amazing announcements about Flutter 3.0! #Flutter #GoogleDeveloper",
-    images: [
-      "https://images.pexels.com/photos/2773498/pexels-photo-2773498.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
-    ],
-    createdAt: "2025-04-16T10:30:00Z",
-    likesCount: 15,
-    commentsCount: 3,
-    sharesCount: 2,
-    isLiked: true,
-    tags: ["Flutter", "GoogleDeveloper"],
-  },
-  {
-    id: "102",
-    author: {
-      id: "1",
-      name: "Demo User",
-      username: "demouser",
-      image: "https://images.pexels.com/photos/220453/pexels-photo-220453.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
-    },
-    content: "Check out my new Firebase authentication tutorial for React Native apps! Let me know what you think. #Firebase #ReactNative #Tutorial",
-    createdAt: "2025-04-14T15:45:00Z",
-    likesCount: 27,
-    commentsCount: 8,
-    sharesCount: 5,
-    isLiked: false,
-    tags: ["Firebase", "ReactNative", "Tutorial"],
-  },
-];
+
 
 export default function ProfilePage() {
   const { user } = useAuth();
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
   
-  useEffect(() => {
-    if (!user) return;
+  // useEffect(() => {
+  //   if (!user) return;
     
-    const fetchUserPosts = async () => {
-      try {
-        await new Promise(resolve => setTimeout(resolve, 1000));
-        setPosts(mockUserPosts);
-      } catch (error) {
-        console.error("Error fetching posts:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
+  //   const fetchUserPosts = async () => {
+  //     try {
+  //       await new Promise(resolve => setTimeout(resolve, 1000));
+  //       setPosts(mockUserPosts);
+  //     } catch (error) {
+  //       console.error("Error fetching posts:", error);
+  //     } finally {
+  //       setLoading(false);
+  //     }
+  //   };
     
-    fetchUserPosts();
-  }, [user]);
+  //   fetchUserPosts();
+  // }, [user]);
+
+  useEffect(()=>{
+
+    try {
+       if(!user) return;
+
+      const postRef=collection(db,"users",user.id,"posts")
+      const postUnsubscribe=onSnapshot(postRef,(snapshot)=>{
+        const fetchedPosts=snapshot.docs.map((doc)=>({
+          post_id:doc.id,
+          author:user,
+          ...doc.data()
+        }))
+        console.log("post")
+        console.log(fetchedPosts)
+        setPosts(fetchedPosts)
+      })
+       return ()=>postUnsubscribe()
+    } catch (error) {
+        console.log("error in profile",error)
+    }
+    finally{
+      setLoading(false)
+    }
+  
+  },[user])
   
   if (!user) {
     redirect('/login');
     return null;
   }
+
+  useEffect(()=>console.log("qwert"),[posts])
   
   const handleLike = (postId) => {
     setPosts(posts.map(post => {
@@ -106,7 +99,7 @@ export default function ProfilePage() {
           <div className="flex flex-col items-start gap-6 lg:flex-row">
             {/* Profile Image */}
             <Avatar className="w-32 h-32 border-4 border-background">
-              <AvatarImage src={user.image} alt={user.name} />
+              <AvatarImage src={user.image ||  "/blank-profile-picture-973460_1280.webp" }    alt={user.name} referrerPolicy="no-referrer" />
               <AvatarFallback className="text-4xl">{user.name.charAt(0)}</AvatarFallback>
             </Avatar>
 
@@ -125,7 +118,7 @@ export default function ProfilePage() {
                 </Button>
               </div>
 
-              {/* Bio and Quick Info */}
+              
               <div className="mt-4 space-y-4">
                 <p className="max-w-2xl text-muted-foreground">
                   {user.bio || "Software developer and GDG enthusiast. Passionate about creating innovative solutions and sharing knowledge within the developer community."}
@@ -152,11 +145,11 @@ export default function ProfilePage() {
 
                 <div className="flex gap-6">
                   <button className="hover:text-primary">
-                    <span className="font-bold">256</span>
+                    <span className="font-bold">{user?.following?.length || 0}</span>
                     <span className="ml-1 text-muted-foreground">Following</span>
                   </button>
                   <button className="hover:text-primary">
-                    <span className="font-bold">1.2K</span>
+                    <span className="font-bold">{user?.followers?.length || 0}</span>
                     <span className="ml-1 text-muted-foreground">Followers</span>
                   </button>
                 </div>
@@ -203,7 +196,6 @@ export default function ProfilePage() {
               </div>
             </div>
 
-            {/* Main Content */}
             <div className="lg:col-span-2">
               <TabsContent value="posts" className="space-y-6">
                 {loading ? (
@@ -215,35 +207,13 @@ export default function ProfilePage() {
                     <PostCard 
                       key={post.id} 
                       post={post} 
-                      onLike={() => handleLike(post.id)} 
                     />
                   ))
                 )}
               </TabsContent>
 
-              <TabsContent value="media">
-                <div className="grid grid-cols-3 gap-4">
-                  {posts
-                    .filter(post => post.images && post.images.length > 0)
-                    .map((post) => (
-                      post.images?.map((image, index) => (
-                        <div key={`${post.id}-${index}`} className="overflow-hidden rounded-lg aspect-square">
-                          <img
-                            src={image}
-                            alt="Media content"
-                            className="object-cover w-full h-full"
-                          />
-                        </div>
-                      ))
-                    ))}
-                </div>
-              </TabsContent>
+              
 
-              <TabsContent value="likes">
-                <div className="py-8 text-center text-muted-foreground">
-                  No liked posts to display
-                </div>
-              </TabsContent>
 
               <TabsContent value="about">
                 <ProfileAbout user={user} />

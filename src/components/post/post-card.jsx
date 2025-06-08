@@ -101,7 +101,7 @@ const [currentMediaIndex, setCurrentMediaIndex] = useState(0);
     if (videoRefs.current[currentMediaIndex]) {
       const currentVideo = videoRefs.current[currentMediaIndex];
       const isVideo = ['mp4', 'mov', 'avi', 'mkv', 'webm'].some(ext => 
-        images[currentMediaIndex]?.toLowerCase().endsWith(ext)
+        post.images[currentMediaIndex]?.toLowerCase().endsWith(ext)
       );
       
       if (isVideo) {
@@ -207,15 +207,14 @@ const handleSavedPost = async (postId, targetUserId) => {
         <div className="flex items-start gap-3">
           <Link href={`/profile/${post?.author?.username}`}>
             <Avatar>
-              {/* <img className="w-12" src={post.author.image} alt={post.author.name} /> */}
-                          <AvatarImage   referrerPolicy="no-referrer" src={post.author.image} width='50' alt={post.author.name} />
+                          <AvatarImage   referrerPolicy="no-referrer" src={post.author?.image || "/blank-profile-picture-973460_1280.webp"} width='50' alt={post.author?.name} />
 
-              <AvatarFallback>{post.author.name.charAt(0)}</AvatarFallback>
+              <AvatarFallback>{post.author?.name?.charAt(0)}</AvatarFallback>
             </Avatar>
           </Link>
           <div>
-            <Link href={`/profile/${post.author.username}`} className="font-medium hover:underline">
-              {post.author.name}
+            <Link href={`/profile/${post.author?.username}`} className="font-medium hover:underline">
+              {post.author?.name}
             </Link>
             <p className="text-sm text-muted-foreground">
               {/* @{post.author.username} · {formatDistanceToNow(new Date(post.createdAt?.toDate()), { addSuffix: true })} */}
@@ -282,10 +281,10 @@ className="flex overflow-x-auto snap-x snap-mandatory touch-pan-x hide-scrollbar
         onTouchEnd={handleDragEnd}
         // style={{ scrollBehavior: isDragging ? 'unset' : 'smooth' }}
       >
-        {post.images.map((file, index) => (
+        {post.images?.map((file, index) => (
           <div key={index} className="relative flex-none w-full snap-center">
             {['mp4', 'mov', 'avi', 'mkv', 'webm'].some(ext => 
-              file.toLowerCase().endsWith(ext)
+              file?.toLowerCase().endsWith(ext)
             ) ? (
               <div className="relative pt-[56.25%]">
                 <video
@@ -376,7 +375,7 @@ className="flex overflow-x-auto snap-x snap-mandatory touch-pan-x hide-scrollbar
             onClick={toggleComments}
           >
             <MessageSquare className="w-5 h-5" />
-            <span>{post.comments?.length || 120}</span>
+            <span>{post.comments?.length || 0}</span>
           </Button>
           <Button variant="ghost" size="sm" className="gap-2">
             <Share className="w-5 h-5" />

@@ -41,7 +41,6 @@ export default function ForgotPasswordPage(){
         
         await resetPassword(values.email)
 
-    //   await new Promise(resolve => setTimeout(resolve, 1500));
       setIsSubmitted(true);
 
       toast(

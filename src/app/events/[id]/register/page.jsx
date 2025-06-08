@@ -22,6 +22,11 @@ import { Badge } from "@/components/ui/badge";
 import { db } from "@/config/firebase";
 import { doc, getDoc, updateDoc } from "firebase/firestore";
 import { useAuth } from "@/components/auth/auth-provider";
+
+
+
+
+
 const formSchema = z.object({
      name: z.string().min(2, "Name must be at least 2 characters"),
   email: z.string().email("Please enter a valid email address"),
@@ -39,6 +44,10 @@ const params = useParams();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [event,setEvent] = useState({});
   const { user } = useAuth();
+
+
+
+  
     const form = useForm({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -77,7 +86,7 @@ const params = useParams();
   const onSubmit = async (values) => {
     setIsSubmitting(true);
     try {
-      // Simulate API call
+      
       console.log("Form values:", values);
         
       const eventRef=doc(db,"events",params.id);

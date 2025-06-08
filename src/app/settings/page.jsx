@@ -69,7 +69,7 @@ export default function SettingsPage() {
 
   const handleSendPasswordReset = async () => {
     try {
-      // Simulate sending password reset email
+      
       await new Promise(resolve => setTimeout(resolve, 1000));
       
       toast.success(<>
@@ -95,9 +95,7 @@ export default function SettingsPage() {
     }
 
     try {
-      // Simulate account deletion
-      await new Promise(resolve => setTimeout(resolve, 1500));
-     
+      
 
       toast.success(<>
         <strong>Account deleted successfully!</strong>

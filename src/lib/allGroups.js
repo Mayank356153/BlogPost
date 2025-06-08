@@ -1,4 +1,4 @@
-// useTopics.js (hook or logic to fetch + listen)
+
 import { collection, onSnapshot } from "firebase/firestore";
 import { db } from "@/config/firebase";
 
@@ -12,7 +12,7 @@ const fetchGroups = (onUpdate) => {
     console.error("Error watching topics:", error);
   });
 
-  return unsubscribe; // Call this to stop listening
+  return unsubscribe; 
 };
 
 export default fetchGroups;

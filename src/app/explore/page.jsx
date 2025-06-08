@@ -5,12 +5,10 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Search, Users, Calendar, Hash } from "lucide-react";
-// import {Post} from "@/components/feed/feed-container"
 import  PostCard  from "@/components/post/post-card";
 import { db } from "@/config/firebase";
-import { collection, onSnapshot,document } from "firebase/firestore";
+import { collection, onSnapshot } from "firebase/firestore";
 import { getDoc } from "firebase/firestore";
-import { set } from "date-fns";
 import { updateDoc,doc,arrayUnion } from "firebase/firestore";
 import { useAuth } from "@/components/auth/auth-provider";
 import { toast } from "sonner";
@@ -34,7 +32,7 @@ const users=async(setPeople,current_id)=>{
       id: doc.id,
       ...doc.data(),
     }));
-    setPeople(users.filter(user => user.id !== current_id)); // Exclude default user if needed
+    setPeople(users.filter(user => user.id !== current_id)); 
   
     console.log("Users updated:", users.filter(user => user.id !== current_id));
   });
@@ -50,7 +48,7 @@ export default function ExplorePage() {
   const [posts, setPosts] = useState([]);
   const [topics,setTopics]=useState([])
   const[people,setPeople]=useState([])
-    const allUsers = useAllUsers();    // hook call at top level, not inside useEffect
+    const allUsers = useAllUsers();   
   const {currentUser,user}=useAuth();
   
   const[currentfollowing,setCurrentFollowing]=useState([])
@@ -68,9 +66,9 @@ useEffect(() => {
     setPosts
   );
 
-  // Cleanup on unmount or dependency change
+
   return () => {
-    console.log("Unsubscribing from posts listener");
+
     unsubscribe();
   };
 }, [currentUser, allUsers]);
@@ -160,7 +158,7 @@ useEffect(() => {
 
     
 if (!query || query.trim() === "") {
-    setFilteredPeople(people); // Return all people if search query is empty
+    setFilteredPeople(people); 
     return;
   }
 
@@ -184,7 +182,7 @@ if (!query || query.trim() === "") {
 
    return (
     <div className="container px-4 py-8 mx-auto">
-      {/* Search header */}
+    
       <div className="mb-8">
         <h1 className="mb-4 text-3xl font-bold">Explore</h1>
         <div className="relative">
@@ -198,7 +196,7 @@ if (!query || query.trim() === "") {
         </div>
       </div>
 
-      {/* Content tabs */}
+    
       <Tabs defaultValue="trending">
         <TabsList className="mb-8">
           <TabsTrigger value="trending">Trending</TabsTrigger>

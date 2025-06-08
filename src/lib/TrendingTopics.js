@@ -4,7 +4,7 @@ const trendingTopics = (callback) => {
   const topicsRef = collection(db, "topics");
 
   const unsubscribe = onSnapshot(topicsRef, (snapshot) => {
-    // Convert snapshot to array with following count
+
     const topics = snapshot.docs.map(doc => {
       const data = doc.data();
       return {
@@ -20,11 +20,11 @@ const trendingTopics = (callback) => {
       .sort((a, b) => b.followingCount - a.followingCount)
       .slice(0, 5);
 
-    // Use callback to send data to UI
+  
     callback(topFive);
   });
 
-  return unsubscribe; // Call this to stop listening
+  return unsubscribe; 
 };
 
 export default  trendingTopics

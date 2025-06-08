@@ -25,7 +25,7 @@ export default function CommentSection({post, group=false,groupId}){
     const[commentsView,setCommentsView]=useState(post.comments || [])
     const[newComment,setNewComment]=useState("")
         const[isSubmitting,setIsSubmitting]=useState(false)
-const { currentUser} = useAuth(); // make sure it's inside your component
+const { currentUser} = useAuth(); 
 const id=useId()
   
 

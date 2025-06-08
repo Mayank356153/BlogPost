@@ -22,122 +22,6 @@ import { collection,snapshot,onSnapshot, arrayUnion, updateDoc, arrayRemove, inc
 import { useAuth } from "@/components/auth/auth-provider";
 import { doc } from "firebase/firestore";
 
-// interface Group {
-//   id: string;
-//   name: string;
-//   description: string;
-//   image: string;
-//   members: number;
-//   type: "public" | "private";
-//   category: string;
-//   activity: {
-//     posts: number;
-//     events: number;
-//   };
-//   recentEvent?: {
-//     title: string;
-//     date: string;
-//   };
-//   isJoined?: boolean;
-//   isPending?: boolean;
-// }
-
-const mockGroups = [
-  {
-    id: "1",
-    name: "Flutter Developers",
-    description: "A community of Flutter enthusiasts sharing knowledge and best practices for cross-platform development.",
-    image: "https://images.pexels.com/photos/2582937/pexels-photo-2582937.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
-    members: 1500,
-    type: "public",
-    category: "Mobile Development",
-    activity: {
-      posts: 230,
-      events: 12,
-    },
-    recentEvent: {
-      title: "Flutter Forward Extended",
-      date: "2025-05-15",
-    },
-    isJoined: true,
-  },
-  {
-    id: "2",
-    name: "Cloud Native Developers",
-    description: "Discussing cloud architecture, Kubernetes, and modern infrastructure patterns.",
-    image: "https://images.pexels.com/photos/1181671/pexels-photo-1181671.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
-    members: 2300,
-    type: "public",
-    category: "Cloud Computing",
-    activity: {
-      posts: 345,
-      events: 8,
-    },
-    recentEvent: {
-      title: "Kubernetes Workshop",
-      date: "2025-06-01",
-    },
-    isJoined: true,
-  },
-];
-
-const discoverGroups = [
-  {
-    id: "3",
-    name: "AI & Machine Learning",
-    description: "Exploring the latest in artificial intelligence, machine learning, and deep learning technologies.",
-    image: "https://images.pexels.com/photos/8386440/pexels-photo-8386440.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
-    members: 1800,
-    type: "public",
-    category: "Artificial Intelligence",
-    activity: {
-      posts: 156,
-      events: 6,
-    },
-    recentEvent: {
-      title: "TensorFlow Workshop",
-      date: "2025-05-20",
-    },
-    isJoined: false,
-  },
-  {
-    id: "4",
-    name: "Web Development Masters",
-    description: "Advanced web development techniques, frameworks, and best practices for modern web applications.",
-    image: "https://images.pexels.com/photos/11035380/pexels-photo-11035380.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
-    members: 2100,
-    type: "public",
-    category: "Web Development",
-    activity: {
-      posts: 289,
-      events: 15,
-    },
-    recentEvent: {
-      title: "React 19 Deep Dive",
-      date: "2025-05-25",
-    },
-    isJoined: false,
-  },
-  {
-    id: "5",
-    name: "Cybersecurity Experts",
-    description: "Sharing knowledge about cybersecurity, ethical hacking, and protecting digital assets.",
-    image: "https://images.pexels.com/photos/60504/security-protection-anti-virus-software-60504.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
-    members: 950,
-    type: "private",
-    category: "Security",
-    activity: {
-      posts: 78,
-      events: 4,
-    },
-    recentEvent: {
-      title: "Penetration Testing Bootcamp",
-      date: "2025-06-10",
-    },
-    isJoined: false,
-  },
-];
-
 export default function GroupsPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [groups, setGroups] = useState([]);
@@ -163,7 +47,7 @@ export default function GroupsPage() {
 
   const handleJoinGroup = async (group) => {
     try {
-      // Simulate API call
+      
 
         if(!user){
           toast.error(<>
@@ -212,8 +96,7 @@ export default function GroupsPage() {
 
   const handleLeaveGroup = async (group) => {
     try {
-      // Simulate API call
-      // await new Promise(resolve => setTimeout(resolve, 1000));
+    
       console.log(user)
       const groupRef=doc(db,"groups",group.id)
       const userRef=doc(db,"users",user.id)
@@ -290,7 +173,7 @@ export default function GroupsPage() {
 
   return (
     <div className="container px-4 py-8 mx-auto">
-      {/* Header */}
+      
       <div className="flex items-center justify-between mb-8">
         <h1 className="text-3xl font-bold">Groups</h1>
         <Button asChild>
@@ -360,7 +243,7 @@ export default function GroupsPage() {
                           </h3>
                           <div className="flex items-center gap-2 text-sm text-muted-foreground">
                             <Users className="w-4 h-4" />
-                            <span>{group.members.toLocaleString()} members</span>
+                            <span>{group.allUser?.length} members</span>
                             <Badge variant="secondary">{group.type}</Badge>
                           </div>
                         </div>
@@ -415,7 +298,7 @@ export default function GroupsPage() {
 
         <TabsContent value="discover">
           <div className="grid gap-6">
-            {discoverGroups.length>0 && discoveredGroups.map((group) => (
+            {discoveredGroups.length>0 && discoveredGroups.map((group) => (
               <div
                 key={group.id}
                 className="overflow-hidden transition-colors border rounded-lg hover:bg-muted/50"
@@ -439,7 +322,7 @@ export default function GroupsPage() {
                         </h3>
                         <div className="flex items-center gap-2 text-sm text-muted-foreground">
                           <Users className="w-4 h-4" />
-                          <span>{group.members.toLocaleString()} members</span>
+                          <span>{group.allUser?.length} members</span>
                           <Badge variant="secondary">{group.type}</Badge>
                         </div>
                       </div>
