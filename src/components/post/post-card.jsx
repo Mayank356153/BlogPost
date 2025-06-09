@@ -131,7 +131,7 @@ const { currentUser } = useAuth(); // make sure it's inside your component
 
 const handleLike = async (postId, targetUserId) => {
   if (!currentUser) return;
-  alert(group)
+  
 let postRef;
   if(!group){
      postRef = doc(db, `users/${targetUserId}/posts/${postId}`);
@@ -217,7 +217,7 @@ const handleSavedPost = async (postId, targetUserId) => {
               {post.author?.name}
             </Link>
             <p className="text-sm text-muted-foreground">
-              {/* @{post.author.username} · {formatDistanceToNow(new Date(post.createdAt?.toDate()), { addSuffix: true })} */}
+              @{post.author.username} · {formatDistanceToNow(new Date(post.createdAt?.toDate()), { addSuffix: true })}
             </p>
           </div>
         </div>

@@ -184,13 +184,7 @@ export default function GroupPage(props) {
        })
    console.log("o")
              
-       const groupRemove=user.groups.filter(gr=> gr!== group.id)
-
-       console.log("a")
-       await updateDoc(userRef,{
-         groups:groupRemove
-       })
- 
+     
       
  
   toast.success(
@@ -510,8 +504,8 @@ export default function GroupPage(props) {
                   {group?.admins?.map((admin) => (
                     <div key={admin.id} className="flex items-center justify-between">
                       <div className="flex items-center gap-3">
-                        <Avatar>
-                          <AvatarImage src={admin?.image} alt={admin.name} width="50" />
+                        <Avatar className="w-8 h-8">
+                          <AvatarImage src={admin?.image ||  "/blank-profile-picture-973460_1280.webp"} alt={admin.name} width="50" referrerPolicy="no-referrer"/>
                           <AvatarFallback>{admin?.name?.charAt(0)}</AvatarFallback>
                         </Avatar>
                         <div>
@@ -531,8 +525,8 @@ export default function GroupPage(props) {
                   {group?.recentMembers?.map((member) => (
                     <div key={member.id} className="flex items-center justify-between">
                       <div className="flex items-center gap-3">
-                        <Avatar>
-                          <AvatarImage src={member?.image} width="50" alt={member?.name} />
+                        <Avatar className="w-8 h-8">
+                          <AvatarImage src={member?.image || "/blank-profile-picture-973460_1280.webp"}  width="50" alt={member?.name} referrerPolicy="no-referrer"/>
                           <AvatarFallback>{member?.name?.charAt(0)}</AvatarFallback>
                         </Avatar>
                         <div>

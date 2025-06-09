@@ -26,6 +26,37 @@ export  function AuthProvider({children}){
 
     
     const auth=getAuth(app);
+
+
+
+    useEffect(()=>{
+                  const check=onAuthStateChanged(auth,async(user)=>{
+                    if(user && user.emailVerified){
+                      console.log("user",user)
+                      setCurrentUser(user)
+                       try {
+        const userRef = doc(db, "users", user.uid);
+        const userSnap = await getDoc(userRef);
+
+        if (userSnap.exists()) {
+          setUser(userSnap.data());
+          router.replace("/dashboard")
+        } else {
+          console.warn("No Firestore user data found");
+          setUser(null);
+        }
+      } catch (error) {
+        console.error("Failed to fetch user data from Firestore:", error);
+        setUser(null);
+      }
+                    }
+                    else{
+                      setCurrentUser(null)
+                      setUser(null)
+                    }
+                  })
+                  return ()=>check();
+    },[])
   
 
 
@@ -150,8 +181,9 @@ const logoutUser = async () => {
     await signOut(auth);
     toast.success("Signed out successfully");
     router.push("/")
-    setUser(null)
-    setCurrentUser(null);
+
+
+
     return { success: true };
   } catch (error) {
     toast.error(`Sign out failed: ${error.message}`);
@@ -323,14 +355,14 @@ return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
 
 }
 
-AuthProvider.propTypes = {
-  children: PropTypes.node.isRequired
-};
+// AuthProvider.propTypes = {
+//   children: PropTypes.node.isRequired
+// };
 
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (context === undefined) {
-    throw new Error('useAuth must be used within an AuthProvider');
+    throw new Error('useAuth nee to be  within an AuthProvider');
   }
   return context;
 };

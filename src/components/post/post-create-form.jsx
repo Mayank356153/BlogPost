@@ -44,7 +44,7 @@ export default function PostCreateForm(){
     const router=useRouter();
     const auth=getAuth()
       const [isSubmitting, setIsSubmitting] = useState(false);
- const [tags, setTags] = useState([[]])
+ const [tags, setTags] = useState([])
   const [currentTag, setCurrentTag] = useState("")
   const [mediaFiles, setMediaFiles] = useState([])
  const [suggestedTags, setSuggestedTags] = useState([]);
@@ -275,8 +275,8 @@ const onSubmit = async (data) => {
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
         <div className="flex items-start gap-3">
-          <Avatar>
-            <AvatarImage src={user.image} alt={user.name} width="50"/>
+          <Avatar className="w-8 h-8">
+            <AvatarImage src={user.image || "/blank-profile-picture-973460_1280.webp"} alt={user.name}  referrerPolicy="no-referrer"/>
             <AvatarFallback>{user.name.charAt(0)}</AvatarFallback>
           </Avatar>
           <div className="flex-1">

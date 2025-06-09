@@ -99,10 +99,10 @@ useEffect(()=>setCommentsView(post.comments || []),[post.comments])
          {/* Comment input */}
       {user && (
         <div className="flex gap-3 mb-6">
-          <Avatar>
-            <AvatarImage src={user.image ||  "/blank-profile-picture-973460_1280.webp"} referrerPolicy="no-referrer"  alt={user.name} />
-            <AvatarFallback>{user.name?.charAt(0) ||"K"}</AvatarFallback>
-          </Avatar>
+           <Avatar className="w-8 h-8">
+                        <AvatarImage referrerPolicy="no-referrer" src={user.image || "/blank-profile-picture-973460_1280.webp" } alt={user.name} />
+                        <AvatarFallback>{user.name.charAt(0)}</AvatarFallback>
+                      </Avatar>
           <div className="flex-1">
             <Textarea
               placeholder="Write a comment..."
@@ -127,7 +127,7 @@ useEffect(()=>setCommentsView(post.comments || []),[post.comments])
         {commentsView.map((comment) => (
           <div key={id} className="flex gap-3">
             <Avatar className="w-8 h-8">
-              <AvatarImage src={comment.author?.image ||  "/blank-profile-picture-973460_1280.webp"} alt={comment.author?.name || "ASd"} />
+              <AvatarImage referrerPolicy="no-referrer" src={comment.author?.image || "/blank-profile-picture-973460_1280.webp" } alt={comment.author?.namr} />
               <AvatarFallback>{comment.author?.name.charAt(0) || "gff"}</AvatarFallback>
             </Avatar>
             <div className="flex-1">

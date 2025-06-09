@@ -64,6 +64,10 @@ const alreadyRegistered = eventExists.attendeesList?.some(
 
 
 
+    
+
+
+
    return (
     <div className="container px-4 py-8 mx-auto">
       {/* Header */}
@@ -86,10 +90,7 @@ const alreadyRegistered = eventExists.attendeesList?.some(
             onChange={(e) => setSearchQuery(e.target.value)}
           />
         </div>
-        <Button variant="outline" onClick={() => Router.push("/events/filter")}>
-          <Filter className="w-4 h-4 mr-2" />
-          Filters
-        </Button>
+       
       </div>
 
       {/* Event tab */}
@@ -152,8 +153,8 @@ const alreadyRegistered = eventExists.attendeesList?.some(
                   
                   <div className="flex items-center justify-between">
                     <div className="flex items-center">
-                      <img
-                        src={event.author.image || "/blank-profile-picture-973460_1280.webp"}
+                      <img    referrerPolicy="no-referrer"
+                        src={event.author.image || "/blank-profile-picture-973460_1280.webp" }
                         alt={event.author.name}
                         className="w-6 h-6 mr-2 rounded-full"
                       />

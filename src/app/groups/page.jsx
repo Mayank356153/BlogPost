@@ -65,16 +65,14 @@ export default function GroupsPage() {
         }
 
         const groupRef=doc(db,"groups",group.id)
-        const userRef=doc(db,"users",user.id)
+        
 
         await updateDoc(groupRef,{
           allUser:arrayUnion(user.id),
           recentMembers:arrayUnion(user)
         })
 
-        await updateDoc(userRef,{
-          groups:arrayUnion(group.id)
-        })
+       
       
       toast.success(
         <>
@@ -110,10 +108,7 @@ export default function GroupsPage() {
       })
   console.log("o")
 
-      const groupRemove=user.groups.filter(gr=> gr!== group.id)
-      await updateDoc(userRef,{
-        groups:groupRemove
-      })
+    
 
      
 

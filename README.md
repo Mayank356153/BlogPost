@@ -1,36 +1,46 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 🚀 GDG Social
 
-## Getting Started
+**GDG Social** is a modern, community-powered blogging and social interaction platform. It allows users to write posts, create groups and events, and engage in real-time messaging. Built with **Next.js**, **Firebase**, and powered by **OpenAI**, GDG Social offers an advanced and interactive user experience for developers and communities alike.
 
-First, run the development server:
+🌐 Live: [https://blog-post-git-main-mayank-sharma-s-projects.vercel.app](https://blog-post-git-main-mayank-sharma-s-projects.vercel.app/)
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+---
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## 🧠 Features
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### ✍️ Blog Features
+- **Create, Edit & Delete Blog Posts**
+- **Like, Comment & Bookmark Posts**
+- **Upload Cover Images**
+- **AI-Generated Tags using OpenAI**
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### 👥 Social Features
+- **Group Creation & Joining**
+  - Public/Private groups
+  - View group-specific posts and media
 
-## Learn More
+- **Event Creation**
+  - Create and manage community events
+  - Add descriptions, dates, and associated groups
 
-To learn more about Next.js, take a look at the following resources:
+- **Real-Time Messaging**
+  - **One-to-one chats** and **Group Chats**
+  - Seen/unseen indicators
+  - Live status updates
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+### 🔐 Authentication
+- Firebase Authentication with:
+  - **Google OAuth**
+  - **GitHub OAuth**
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+---
 
-## Deploy on Vercel
+## 🛠️ Tech Stack
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+- **Frontend:** [Next.js](https://nextjs.org/) (App Router)
+- **Styling:** [Tailwind CSS](https://tailwindcss.com/), [Shadcn UI](https://ui.shadcn.com/)
+- **Auth & Backend:** [Firebase Auth](https://firebase.google.com/products/auth), [Firestore DB](https://firebase.google.com/products/firestore), [Cloudinary](https://cloudinary.com/)
+- **AI Integration:** [OpenAI API](https://platform.openai.com/)
+- **Deployment:** [Vercel](https://vercel.com/)
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+---
