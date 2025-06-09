@@ -200,6 +200,21 @@ const handleSavedPost = async (postId, targetUserId) => {
  }
 }
 
+
+function getSafeDate(value) {
+  if (!value) return new Date(); // fallback to now
+
+  // Firestore Timestamp
+  if (typeof value.toDate === 'function') return value.toDate();
+
+  // Already a Date
+  if (value instanceof Date) return value;
+
+  // If it's a string or number
+  const date = new Date(value);
+  return isNaN(date.getTime()) ? new Date() : date;
+}
+
   return(
      <div className="border rounded-lg bg-card">
       {/* Post Header */}
@@ -217,8 +232,12 @@ const handleSavedPost = async (postId, targetUserId) => {
               {post.author?.name}
             </Link>
             <p className="text-sm text-muted-foreground">
-              @{post.author.username} · {formatDistanceToNow(new Date(post.createdAt?.toDate()), { addSuffix: true })}
-            </p>
+@{post.author.username} · {
+  formatDistanceToNow(
+    getSafeDate(post.createdAt),
+    { addSuffix: true }
+  )
+}            </p>
           </div>
         </div>
         <DropdownMenu>

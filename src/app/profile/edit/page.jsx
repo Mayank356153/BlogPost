@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState,useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -39,7 +39,6 @@ import {
 const formSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
   bio: z.string().max(500, "Bio cannot exceed 500 characters"),
-  location: z.string().min(2, "Location must be at least 2 characters"),
   website: z.string().url("Please enter a valid URL").or(z.string().length(0)),
   github: z.string().min(2, "GitHub username must be at least 2 characters").or(z.string().length(0)),
   linkedin: z.string().min(2, "LinkedIn username must be at least 2 characters").or(z.string().length(0)),
@@ -60,7 +59,6 @@ export default function EditProfilePage() {
     defaultValues: {
       name: user?.name || "",
       bio: user?.bio || "",
-      location: "San Francisco, CA",
       website: "",
       github: "",
       linkedin: "",
@@ -68,6 +66,7 @@ export default function EditProfilePage() {
       email: user?.email || "",
     },
   });
+  
 
   const handleAvatarChange = (e) => {
     const file = e.target.files?.[0];
@@ -108,11 +107,13 @@ export default function EditProfilePage() {
     }
   };
 
+  useEffect(() => {
   if (!user) {
     router.push("/login");
-    return null;
   }
+}, [user, router]);
 
+if (!user) return null;
   return (
     <div className="container px-4 py-8 mx-auto">
       <div className="max-w-2xl mx-auto">
@@ -194,22 +195,7 @@ export default function EditProfilePage() {
                   )}
                 />
 
-                <FormField
-                  control={form.control}
-                  name="location"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Location</FormLabel>
-                      <FormControl>
-                        <div className="relative">
-                          <MapPin className="absolute w-4 h-4 left-3 top-3 text-muted-foreground" />
-                          <Input className="pl-10" placeholder="Your location" {...field} />
-                        </div>
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+              
 
                 <FormField
                   control={form.control}

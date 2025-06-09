@@ -13,6 +13,8 @@ import { redirect } from 'next/navigation';
 
 export default function DashboardPage() {
   const {user}=useAuth();
+
+  
   if(!user){
     redirect('/login')
     return(null)
