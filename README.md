@@ -1,6 +1,6 @@
-# 🚀 GDG Social
+# 🚀 BlogPost
 
-**GDG Social** is a modern, community-powered blogging and social interaction platform. It allows users to write posts, create groups and events, and engage in real-time messaging. Built with **Next.js**, **Firebase**, and powered by **OpenAI**, GDG Social offers an advanced and interactive user experience for developers and communities alike.
+**BlogPost** is a modern, community-powered blogging and social interaction platform. It allows users to write posts, create groups and events, and engage in real-time messaging. Built with **Next.js**, **Firebase**, and powered by **OpenAI**, BlogPost offers an advanced and interactive user experience for developers and communities alike.
 
 🌐 Live: [https://blog-post-git-main-mayank-sharma-s-projects.vercel.app](https://blog-post-git-main-mayank-sharma-s-projects.vercel.app/)
 
