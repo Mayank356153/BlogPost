@@ -18,7 +18,7 @@ export default function TrendingTopics(){
   const[topics,setTopics]=useState([])
   useEffect(()=>{
      const unsubscribe = trendingTopics(setTopics);
-    return () => unsubscribe(); // Cleanup listener on unmount
+    return () => unsubscribe(); 
   },[])
   useEffect(()=>console.log("sssss",topics),[topics])
 

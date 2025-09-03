@@ -13,8 +13,8 @@ import { set } from "date-fns";
 
 
 export default function FeedContainer(){
-   const { user,currentUser } = useAuth(); // auth hook at top level
-  const allUsers = useAllUsers();    // hook call at top level, not inside useEffect
+   const { user,currentUser } = useAuth();
+  const allUsers = useAllUsers();    
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(false);
 
@@ -24,24 +24,24 @@ useEffect(() => {
 
   console.log("currentUser", currentUser);
 
-  // Set up Firestore listener
+
   const unsubscribe = fetchFollowedUsersPosts(
     user,
     allUsers,
     setPosts,
   );
 
-  // Cleanup on unmount or dependency change
+  
   return () => {
     console.log("Unsubscribing from posts listener");
     unsubscribe();
   };
 }, [currentUser, allUsers]);
 
-useEffect(() => console.log("Posts updated:", posts), [posts]); // Debugging line to check posts updates
+useEffect(() => console.log("Posts updated:", posts), [posts]); 
   
 
-    const handleLike=(postId)=>{   //change later for like manage of real post
+    const handleLike=(postId)=>{   
         setPosts(posts.map(post => {
       if (post.id === postId) {
         const isLiked = !post.isLiked;
