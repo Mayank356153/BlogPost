@@ -51,70 +51,50 @@ export default function PostCreateForm(){
   const [isGeneratingTags, setIsGeneratingTags] = useState(false);
  const imageInputRef = useRef(null)
 
- 
-  const generateTags = async () => {
-if (!content || typeof content !== 'string' || content.trim().length < 10) {
+ const generateTags = async () => {
+  if (!content || typeof content !== "string" || content.trim().length < 10) {
     toast.error(
       <>
         <strong>Content too short</strong>
-        <div>Please provide more content (at least 10 characters) to generate relevant tags.</div>
+        <div>Please provide more content (at least 10 characters).</div>
       </>
     );
     return;
   }
 
-   if (isGeneratingTags) return;
-    
-    setIsGeneratingTags(true);
-    try {
-        const prompt = `
-      Analyze the following content and suggest 5-10 relevant tags.
-      Return ONLY a comma-separated list of tags, nothing else.
-      Make the tags lowercase, concise, and relevant to tech/development when applicable.
-      
-      Content: "${content}"
-    `;
+  if (isGeneratingTags) return;
 
-     const response = await openai.chat.completions.create({
-      model: "gpt-4.1",
-      messages: [
-        { role: "system", content: "You are a helpful assistant that generates relevant tags for content." },
-        { role: "user", content: prompt }
-      ],
-      temperature: 0.5,
-      max_tokens: 60
+  setIsGeneratingTags(true);
+  try {
+    const res = await fetch("/pages/api/generate-tags", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ content }),
     });
-     const tagsString = response.choices[0]?.message?.content || '';
-    const newTags = tagsString.split(',')
-      .map(tag => tag.trim().toLowerCase())
-      .filter(tag => tag.length > 0);
 
-    if (newTags.length === 0) {
-      toast.info(
-        <>
-          <strong>No tags generated</strong>
-          <div>The AI couldn't extract relevant tags from your content.</div>
-        </>
-      );
-    }
+    const data = await res.json();
+
+    if (!res.ok) throw new Error(data.error || "API error");
+
+    const newTags = data.tags
+      .split(",")
+      .map((tag) => tag.trim().toLowerCase())
+      .filter((tag) => tag.length > 0);
 
     setTags(newTags);
-    } catch (error) {
-     
- console.error('OpenAI API error:', error);
+  } catch (error) {
+    console.error("Tag generation error:", error);
     toast.error(
       <>
         <strong>AI Service Error</strong>
-        <div>
-          {error.response?.data?.error?.message || 
-           'Failed to generate tags. Please try again later.'}
-        </div>
+        <div>{error.message || "Failed to generate tags. Try again later."}</div>
       </>
     );
-    } finally {
-      setIsGeneratingTags(false);
-    }
-  };
+  } finally {
+    setIsGeneratingTags(false);
+  }
+};
+
   
 
   const handleImageClick = () => {
