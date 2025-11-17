@@ -66,7 +66,7 @@ export default function PostCreateForm(){
 
   setIsGeneratingTags(true);
   try {
-    const res = await fetch("/pages/api/generate-tags", {
+    const res = await fetch("/app/api/generate-tags/route.js", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ content }),
