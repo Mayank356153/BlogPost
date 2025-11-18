@@ -15,12 +15,12 @@ export default function Home() {
         <div className="container py-12 mx-auto text-center sm:py-16">
           <Layers className="w-12 h-12 mx-auto mb-4 sm:h-16 sm:w-16 text-primary sm:mb-6" />
           <h1 className="mb-4 text-3xl font-bold sm:text-4xl md:text-5xl lg:text-6xl sm:mb-6">
-            Welcome to GDG Social
+            Welcome to BlogPost
           </h1>
-          <p className="max-w-2xl px-4 mx-auto mb-6 text-lg sm:text-xl text-muted-foreground sm:mb-8">
+          {/* <p className="max-w-2xl px-4 mx-auto mb-6 text-lg sm:text-xl text-muted-foreground sm:mb-8">
             Connect with Google Developer Group members worldwide. Share knowledge,
             collaborate on projects, and grow together.
-          </p>
+          </p> */}
           <div className="flex flex-col justify-center gap-3 px-4 sm:flex-row">
             <Button size="lg" className="w-full sm:w-auto" asChild>
               <Link href="/signup">Join the Community</Link>
@@ -95,9 +95,9 @@ export default function Home() {
       <section className="px-4 py-12 sm:py-16 bg-primary text-primary-foreground sm:px-6">
         <div className="container mx-auto text-center">
           <h2 className="mb-4 text-2xl font-bold sm:text-3xl sm:mb-6">Ready to get started?</h2>
-          <p className="max-w-2xl mx-auto mb-6 text-lg sm:text-xl sm:mb-8 opacity-90">
+          {/* <p className="max-w-2xl mx-auto mb-6 text-lg sm:text-xl sm:mb-8 opacity-90">
             Join the  community today and connect with developers worldwide
-          </p>
+          </p> */}
           <Button size="lg" variant="secondary" className="w-full sm:w-auto" asChild>
             <Link href="/signup">Create Your Account</Link>
           </Button>

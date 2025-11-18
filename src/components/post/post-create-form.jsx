@@ -33,11 +33,14 @@ import { Wand2 } from "lucide-react";
 const formSchema = z.object({
   content: z.string().min(1, "Post content can't be empty").max(500, "Post content can't exceed 500 characters"),
 });
+import { Calendar } from "@/components/ui/calendar";
+import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover";
+import { format } from "date-fns";
 
 
 
 
-export default function PostCreateForm(){
+export default function PostCreateForm({setOpen}){
       
      const {reset}=useForm();
     const {user}=useAuth()
@@ -50,8 +53,11 @@ export default function PostCreateForm(){
  const [suggestedTags, setSuggestedTags] = useState([]);
   const [isGeneratingTags, setIsGeneratingTags] = useState(false);
  const imageInputRef = useRef(null)
-
+ const [postDate, setPostDate] = useState(null);
+ const [postTime, setPostTime] = useState("");
+ 
  const generateTags = async () => {
+  console.log("lkkkkk")
   if (!content || typeof content !== "string" || content.trim().length < 10) {
     toast.error(
       <>
@@ -66,13 +72,13 @@ export default function PostCreateForm(){
 
   setIsGeneratingTags(true);
   try {
-    const res = await fetch("/app/api/generate-tags/route.js", {
+    const res = await fetch("api/generate-tags", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ content }),
     });
-
     const data = await res.json();
+    console.log("data",data)
 
     if (!res.ok) throw new Error(data.error || "API error");
 
@@ -203,19 +209,16 @@ const onSubmit = async (data) => {
 
     const newPost = {
       content: data.content,
-
-      
       images: mediaUrls.flat(),
-      
+      scheduledDate: postDate ? postDate.toString() : null,
+      scheduledTime: postTime || null,
       createdAt: new Date(),
-      
       userId: currentUser.uid, // or user.id
       likesCount:0,
       commentCount:0,
       sharesCount:0,
       isLiked:false,
       tags: tags.length > 0 ? tags : [],
-      
     };
 
     console.log(newPost)
@@ -230,7 +233,7 @@ const onSubmit = async (data) => {
     <div>Your post has been saved under your profile.</div>
   </>
 );
-
+     
 
     
 
@@ -247,6 +250,7 @@ const onSubmit = async (data) => {
     </>)
   } finally {
     setIsSubmitting(false);
+    setOpen(false)
   }
 };
 
@@ -417,10 +421,46 @@ const onSubmit = async (data) => {
               Video
             </Button>
           </div>
-          <Button type="submit" disabled={isSubmitting}>
+          {/* ---------------- DATE & TIME PICKER ---------------- */}
+
+  
+
+  {/* Date Picker */}
+  <div className="flex items-center gap-3">
+    <Popover>
+      <PopoverTrigger asChild>
+        <Button
+          variant="outline"
+          className="w-[200px] justify-start text-left font-normal ml-2"
+        >
+          {postDate ? format(postDate, "PPP") : "Pick a date"}
+        </Button>
+      </PopoverTrigger>
+      <PopoverContent className="w-auto p-0">
+        <Calendar
+          mode="single"
+          selected={postDate}
+          onSelect={setPostDate}
+        />
+      </PopoverContent>
+    </Popover>
+
+    {/* Time Picker */}
+    <input
+      type="time"
+      value={postTime}
+      onChange={(e) => setPostTime(e.target.value)}
+      className="p-2 ml-1 border rounded-md"
+    />
+  </div>
+
+
+          
+         
+        </div>
+        <Button type="submit" disabled={isSubmitting} className="w-full">
             {isSubmitting ? "Posting..." : "Post"}
           </Button>
-        </div>
       </form>
     </Form>
   )

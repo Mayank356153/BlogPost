@@ -11,7 +11,7 @@ export async function POST(req) {
 
     // Call Hugging Face model (zero-shot classification or text generation)
     const response = await fetch(
-      "https://api-inference.huggingface.co/models/facebook/bart-large-mnli",
+      "https://router.huggingface.co/hf-inference/models/facebook/bart-large-mnli",
       {
         method: "POST",
         headers: {

@@ -9,7 +9,32 @@ export function fetchFollowedUsersPosts(user, allUsers, setPosts) {
 
   const unsubscribeFunctions = [];
   const allUserPostsMap = {}; // { userId: [posts] }
-
+  const isPostAllowed = (post) => {
+    // If no schedule → always show
+    if (!post.scheduledDate || !post.scheduledTime) return true;
+  
+    const now = new Date();
+    const current = new Date(
+      now.getFullYear(),
+      now.getMonth(),
+      now.getDate(),
+      now.getHours(),
+      now.getMinutes()
+    );
+  
+    const scheduledAt = new Date(`${post.scheduledDate}T${post.scheduledTime}`);
+  
+    const scheduledRounded = new Date(
+      scheduledAt.getFullYear(),
+      scheduledAt.getMonth(),
+      scheduledAt.getDate(),
+      scheduledAt.getHours(),
+      scheduledAt.getMinutes()
+    );
+  
+    return scheduledRounded.getTime() === current.getTime();
+  };
+  
   followingUsers.forEach(us => {
     const postsRef = collection(db, `users/${us.id}/posts`);
     console.log(`Setting listener on users/${us.id}/posts`);
@@ -25,7 +50,7 @@ export function fetchFollowedUsersPosts(user, allUsers, setPosts) {
 
       // Combine and shuffle all posts
       const combinedPosts = Object.values(allUserPostsMap)
-        .flat()
+        .flat().filter(isPostAllowed)
         .sort(() => Math.random() - 0.5);
 
       console.log(`Updated combined posts (${combinedPosts.length})`);

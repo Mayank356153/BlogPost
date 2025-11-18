@@ -34,7 +34,7 @@ export default function PostCreateButton() {
             Share your thoughts, ideas, and media with the GDG community.
           </DialogDescription>
         </DialogHeader>
-        <PostCreateForm onSuccess={() => setOpen(false)} />
+        <PostCreateForm onSuccess={() => setOpen(false)} setOpen={setOpen}/>
       </DialogContent>
     </Dialog>
   );
